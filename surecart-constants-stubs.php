@@ -38,4 +38,5 @@
 \define('SURECART_VENDOR_DIR', __DIR__ . \DIRECTORY_SEPARATOR . 'vendor');
 \define('SURECART_APP_URL', 'https://app.surecart.com');
 \define('SURECART_API_URL', 'https://api.surecart.com');
+\define('SURECART_JS_URL', 'https://js.surecart.com');
 \define('SURECART_CDN_IMAGE_BASE', 'https://surecart.com/cdn-cgi/image');
