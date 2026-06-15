@@ -14028,18 +14028,6 @@ namespace SureCart\Models {
          * @var string
          */
         protected $object_name = 'product_group';
-        /**
-         * Is this cachable?
-         *
-         * @var boolean
-         */
-        protected $cachable = true;
-        /**
-         * Clear cache when products are updated.
-         *
-         * @var string
-         */
-        protected $cache_key = 'products_updated_at';
     }
     /**
      * ProductMedia model
