@@ -69,6 +69,14 @@ namespace SureCart\Account {
         {
         }
         /**
+         * Is the account connected?
+         *
+         * @return boolean
+         */
+        public function isConnected()
+        {
+        }
+        /**
          * Get the account model attribute
          *
          * @param string $attribute Attribute name.
@@ -14564,6 +14572,14 @@ namespace SureCart\Models {
          * @return boolean
          */
         public function canBeCanceled()
+        {
+        }
+        /**
+         * Should delay subscription cancellation?
+         *
+         * @return boolean
+         */
+        public function shouldDelayCancellation(): bool
         {
         }
         /**
@@ -34386,6 +34402,15 @@ namespace SureCartBlocks\Blocks\ProductItemList {
          * @return string
          */
         public function getStyle($attr, $item_attributes)
+        {
+        }
+        /**
+         * Get the dummy products array.
+         *
+         * @param  int $limit Limit per page.
+         * @return array Dummy Products.
+         */
+        public function getDummyProducts($limit = 15)
         {
         }
         /**
