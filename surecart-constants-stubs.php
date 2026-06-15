@@ -35,6 +35,7 @@
 \define('SURECART_PLUGIN_FILE', __FILE__);
 \define('SURECART_PLUGIN_DIR_NAME', \dirname(\plugin_basename(\SURECART_PLUGIN_FILE)));
 \define('SURECART_LANGUAGE_DIR', __DIR__ . \DIRECTORY_SEPARATOR . 'languages');
+\define('SURECART_VENDOR_DIR', __DIR__ . \DIRECTORY_SEPARATOR . 'vendor');
 \define('SURECART_APP_URL', 'https://app.surecart.com');
 \define('SURECART_API_URL', 'https://api.surecart.com');
 \define('SURECART_CDN_IMAGE_BASE', 'https://surecart.com/cdn-cgi/image');

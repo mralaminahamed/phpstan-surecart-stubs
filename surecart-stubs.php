@@ -24,6 +24,14 @@ namespace SureCart\Account {
          */
         protected $cache_key = 'surecart_account';
         /**
+         * Bootstrap the service.
+         *
+         * @return void
+         */
+        public function bootstrap()
+        {
+        }
+        /**
          * We get the account when the service is loaded.
          * Since this is loaded in a service container, its
          * cached so it only fetches once, no matter how many calls.
@@ -163,6 +171,14 @@ namespace SureCart\Activation {
         {
         }
         /**
+         * On deactivation logic.
+         *
+         * @return void
+         */
+        public function deactivate()
+        {
+        }
+        /**
          * Remove roles and all data.
          *
          * @return void
@@ -221,6 +237,168 @@ namespace SureCart\Activation {
     }
 }
 namespace SureCart\Background {
+    /**
+     * Abstract WP_Async_Request class.
+     *
+     * @abstract
+     */
+    abstract class AsyncRequest
+    {
+        /**
+         * Prefix
+         *
+         * (default value: 'wp')
+         *
+         * @var string
+         * @access protected
+         */
+        protected $prefix = 'wp';
+        /**
+         * Action
+         *
+         * (default value: 'async_request')
+         *
+         * @var string
+         * @access protected
+         */
+        protected $action = 'async_request';
+        /**
+         * Identifier
+         *
+         * @var mixed
+         * @access protected
+         */
+        protected $identifier;
+        /**
+         * Data
+         *
+         * (default value: array())
+         *
+         * @var array
+         * @access protected
+         */
+        protected $data = array();
+        /**
+         * Initiate new async request.
+         */
+        public function bootstrap()
+        {
+        }
+        /**
+         * Set data used during the request.
+         *
+         * @param array $data Data.
+         *
+         * @return $this
+         */
+        public function data($data)
+        {
+        }
+        /**
+         * Dispatch the async request.
+         *
+         * @return array|WP_Error|false HTTP Response array, WP_Error on failure, or false if not attempted.
+         */
+        public function dispatch()
+        {
+        }
+        /**
+         * Get query args.
+         *
+         * @return array
+         */
+        protected function get_query_args()
+        {
+        }
+        /**
+         * Get query URL.
+         *
+         * @return string
+         */
+        protected function get_query_url()
+        {
+        }
+        /**
+         * Get post args.
+         *
+         * @return array
+         */
+        protected function get_post_args()
+        {
+        }
+        /**
+         * Maybe handle a dispatched request.
+         *
+         * Check for correct nonce and pass to handler.
+         *
+         * @return void|mixed
+         */
+        public function maybe_handle()
+        {
+        }
+        /**
+         * Should the process exit with wp_die?
+         *
+         * @param mixed $return What to return if filter says don't die, default is null.
+         *
+         * @return void|mixed
+         */
+        protected function maybe_wp_die($return = null)
+        {
+        }
+        /**
+         * Handle a dispatched request.
+         *
+         * Override this method to perform any actions required
+         * during the async request.
+         */
+        abstract public function handle();
+    }
+    /**
+     * SureCart Queue
+     *
+     * A job queue using WordPress actions.
+     */
+    class AsyncWebhookService extends \SureCart\Background\AsyncRequest
+    {
+        /**
+         * Map object names to their models.
+         *
+         * @var array
+         */
+        protected $models = ['charge' => \SureCart\Models\Charge::class, 'coupon' => \SureCart\Models\Coupon::class, 'customer' => \SureCart\Models\Customer::class, 'purchase' => \SureCart\Models\Purchase::class, 'price' => \SureCart\Models\Price::class, 'product' => \SureCart\Models\Product::class, 'period' => \SureCart\Models\Period::class, 'order' => \SureCart\Models\Order::class, 'refund' => \SureCart\Models\Refund::class, 'subscription' => \SureCart\Models\Subscription::class, 'invoice' => \SureCart\Models\Invoice::class, 'account' => \SureCart\Models\Account::class, 'webhook_endpoint' => \SureCart\Models\Webhook::class];
+        /**
+         * Enqueue an action to run one time, as soon as possible
+         *
+         * @var string
+         */
+        protected $prefix = 'surecart';
+        /**
+         * Action for ajax hooks.
+         *
+         * @var string
+         */
+        protected $action = 'async_webhook';
+        /**
+         * Handle a dispatched request.
+         *
+         * @param integer $id The webhook process id.
+         * @return void
+         * @throws \Exception If no id is specified.
+         */
+        public function handle($id = 0)
+        {
+        }
+        /**
+         * Replace our dot notation webhook with underscore.
+         *
+         * @param string $type The event type.
+         * @return string
+         */
+        public function createEventName($type = '')
+        {
+        }
+    }
     /**
      * WordPress Users service.
      */
@@ -297,6 +475,146 @@ namespace SureCart\Background {
          * @return \SureCart\Models\Customer|\WP_Error
          */
         public function syncCustomer($customer, $create_user, $run_actions)
+        {
+        }
+    }
+    /**
+     * SureCart Queue
+     *
+     * A job queue using WordPress actions.
+     */
+    class QueueService
+    {
+        /**
+         * Enqueue an action to run one time, as soon as possible
+         *
+         * @param string $hook The hook to trigger.
+         * @param array  $args Arguments to pass when the hook triggers.
+         * @param string $group The group to assign this job to.
+         * @return string $this.
+         */
+        public function async($hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Schedule an action to run once at some time in the future
+         *
+         * @param int    $timestamp When the job will run.
+         * @param string $hook The hook to trigger.
+         * @param array  $args Arguments to pass when the hook triggers.
+         * @param string $group The group to assign this job to.
+         * @return string $this.
+         */
+        public function scheduleSingle($timestamp, $hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Schedule a recurring action
+         *
+         * @param int    $timestamp When the first instance of the job will run.
+         * @param int    $interval_in_seconds How long to wait between runs.
+         * @param string $hook The hook to trigger.
+         * @param array  $args Arguments to pass when the hook triggers.
+         * @param string $group The group to assign this job to.
+         * @return string $this.
+         */
+        public function scheduleRecurring($timestamp, $interval_in_seconds, $hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Schedule an action that recurs on a cron-like schedule.
+         *
+         * @param int    $timestamp The schedule will start on or after this time.
+         * @param string $cron_schedule A cron-link schedule string.
+         * @see http://en.wikipedia.org/wiki/Cron
+         *   *    *    *    *    *    *
+         *   ┬    ┬    ┬    ┬    ┬    ┬
+         *   |    |    |    |    |    |
+         *   |    |    |    |    |    + year [optional]
+         *   |    |    |    |    +----- day of week (0 - 7) (Sunday=0 or 7)
+         *   |    |    |    +---------- month (1 - 12)
+         *   |    |    +--------------- day of month (1 - 31)
+         *   |    +-------------------- hour (0 - 23)
+         *   +------------------------- min (0 - 59)
+         * @param string $hook The hook to trigger.
+         * @param array  $args Arguments to pass when the hook triggers.
+         * @param string $group The group to assign this job to.
+         * @return string $this
+         */
+        public function scheduleCron($timestamp, $cron_schedule, $hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Dequeue the next scheduled instance of an action with a matching hook (and optionally matching args and group).
+         *
+         * Any recurring actions with a matching hook should also be cancelled, not just the next scheduled action.
+         *
+         * While technically only the next instance of a recurring or cron action is unscheduled by this method, that will also
+         * prevent all future instances of that recurring or cron action from being run. Recurring and cron actions are scheduled
+         * in a sequence instead of all being scheduled at once. Each successive occurrence of a recurring action is scheduled
+         * only after the former action is run. As the next instance is never run, because it's unscheduled by this function,
+         * then the following instance will never be scheduled (or exist), which is effectively the same as being unscheduled
+         * by this method also.
+         *
+         * @param string $hook The hook that the job will trigger.
+         * @param array  $args Args that would have been passed to the job.
+         * @param string $group The group the job is assigned to (if any).
+         */
+        public function cancel($hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Dequeue all actions with a matching hook (and optionally matching args and group) so no matching actions are ever run.
+         *
+         * @param string $hook The hook that the job will trigger.
+         * @param array  $args Args that would have been passed to the job.
+         * @param string $group The group the job is assigned to (if any).
+         */
+        public function cancelAll($hook, $args = array(), $group = '')
+        {
+        }
+        /**
+         * Get the date and time for the next scheduled occurrence of an action with a given hook
+         * (an optionally that matches certain args and group), if any.
+         *
+         * @param string $hook The hook that the job will trigger.
+         * @param array  $args Filter to a hook with matching args that will be passed to the job when it runs.
+         * @param string $group Filter to only actions assigned to a specific group.
+         * @return DateTime|null The date and time for the next occurrence, or null if there is no pending, scheduled action for the given hook.
+         */
+        public function getNext($hook, $args = null, $group = '')
+        {
+        }
+        /**
+         * Find scheduled actions
+         *
+         * @param array  $args Possible arguments, with their default values:
+         *        'hook' => '' - the name of the action that will be triggered
+         *        'args' => null - the args array that will be passed with the action
+         *        'date' => null - the scheduled date of the action. Expects a DateTime object, a unix timestamp, or a string that can parsed with strtotime(). Used in UTC timezone.
+         *        'date_compare' => '<=' - operator for testing "date". accepted values are '!=', '>', '>=', '<', '<=', '='
+         *        'modified' => null - the date the action was last updated. Expects a DateTime object, a unix timestamp, or a string that can parsed with strtotime(). Used in UTC timezone.
+         *        'modified_compare' => '<=' - operator for testing "modified". accepted values are '!=', '>', '>=', '<', '<=', '='
+         *        'group' => '' - the group the action belongs to
+         *        'status' => '' - ActionScheduler_Store::STATUS_COMPLETE or ActionScheduler_Store::STATUS_PENDING
+         *        'claimed' => null - TRUE to find claimed actions, FALSE to find unclaimed actions, a string to find a specific claim ID
+         *        'per_page' => 5 - Number of results to return
+         *        'offset' => 0
+         *        'orderby' => 'date' - accepted values are 'hook', 'group', 'modified', or 'date'
+         *        'order' => 'ASC'.
+         *
+         * @param string $return_format OBJECT, ARRAY_A, or ids.
+         * @return array
+         */
+        public function search($args = array(), $return_format = OBJECT)
+        {
+        }
+        /**
+         * Run the queue immedidately.
+         *
+         * @return void
+         */
+        public function run()
         {
         }
     }
@@ -986,6 +1304,16 @@ namespace SureCart\Controllers\Admin {
     abstract class AdminController
     {
         /**
+         * Preload API Request Paths
+         *
+         * @param array $preload_paths The preload paths.
+         *
+         * @return void
+         */
+        public function preloadPaths($preload_paths)
+        {
+        }
+        /**
          * The header.
          *
          * @return void
@@ -1010,7 +1338,7 @@ namespace SureCart\Controllers\Admin\Abandoned {
         /**
          * Edit abandoned order.
          */
-        public function edit()
+        public function edit($request)
         {
         }
     }
@@ -1072,7 +1400,7 @@ namespace SureCart\Controllers\Admin\Bumps {
         /**
          * Edit
          */
-        public function edit()
+        public function edit($request)
         {
         }
         /**
@@ -1486,7 +1814,7 @@ namespace SureCart\Controllers\Admin\Coupons {
         /**
          * Coupons edit.
          */
-        public function edit()
+        public function edit($request)
         {
         }
     }
@@ -1673,7 +2001,7 @@ namespace SureCart\Controllers\Admin\Customers {
         /**
          * Customers edit.
          */
-        public function edit()
+        public function edit($request)
         {
         }
         /**
@@ -2051,7 +2379,7 @@ namespace SureCart\Controllers\Admin\Licenses {
         /**
          * Licenses edit.
          */
-        public function edit()
+        public function edit($request)
         {
         }
         /**
@@ -2453,11 +2781,14 @@ namespace SureCart\Controllers\Admin\Orders {
         {
         }
         /**
-         * Coupons edit.
+         * Orders edit
          */
-        public function edit()
+        public function edit($request)
         {
         }
+        /**
+         * Archive orders.
+         */
         public function archive($request)
         {
         }
@@ -2493,7 +2824,7 @@ namespace SureCart\Controllers\Admin\ProductGroups {
     /**
      * Handles product admin requests.
      */
-    class ProductGroupsController
+    class ProductGroupsController extends \SureCart\Controllers\Admin\AdminController
     {
         /**
          * Index.
@@ -2504,7 +2835,7 @@ namespace SureCart\Controllers\Admin\ProductGroups {
         /**
          * Show
          */
-        public function show()
+        public function show($request)
         {
         }
     }
@@ -2659,16 +2990,6 @@ namespace SureCart\Controllers\Admin\Products {
          * Products index.
          */
         public function index()
-        {
-        }
-        /**
-         * Preload API Requests
-         *
-         * @param \SureCart\Models\Product $product The product.
-         *
-         * @return void
-         */
-        public function preloadAPIRequests($product)
         {
         }
         /**
@@ -3160,6 +3481,32 @@ namespace SureCart\Controllers\Admin\Settings {
         protected $scripts = ['show' => ['surecart/scripts/admin/upgrade', 'admin/settings/upgrade']];
     }
 }
+namespace SureCart\Controllers\Admin\SubscriptionInsights {
+    /**
+     * Subscriptions page
+     */
+    class SubscriptionInsightsScriptsController extends \SureCart\Support\Scripts\AdminModelEditController
+    {
+        /**
+         * What types of data to add the the page.
+         *
+         * @var array
+         */
+        protected $with_data = ['currency'];
+        /**
+         * Script handle.
+         *
+         * @var string
+         */
+        protected $handle = 'surecart/scripts/admin/subscription_insights';
+        /**
+         * Script path.
+         *
+         * @var string
+         */
+        protected $path = 'admin/subscription-insights';
+    }
+}
 namespace SureCart\Controllers\Admin\Subscriptions\Scripts {
     /**
      * Coupon page
@@ -3251,7 +3598,7 @@ namespace SureCart\Controllers\Admin\Subscriptions {
          *
          * @return string
          */
-        public function edit()
+        public function edit($request)
         {
         }
         /**
@@ -3259,7 +3606,7 @@ namespace SureCart\Controllers\Admin\Subscriptions {
          *
          * @return string
          */
-        public function show()
+        public function show($request)
         {
         }
     }
@@ -4081,6 +4428,72 @@ namespace SureCart\Controllers\Rest {
         protected $class = \SureCart\Models\Fulfillment::class;
     }
     /**
+     * Handle Price requests through the REST API
+     */
+    class IncomingWebhooksController
+    {
+        /**
+         * Create a product integration.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return \WP_REST_Response|\WP_Error
+         */
+        public function create(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * Retry the incoming webhook.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return void
+         */
+        public function retry(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * List all product integrations.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return \WP_REST_Response|\WP_Error
+         */
+        public function index(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * Find a specific product integration.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return \WP_REST_Response|\WP_Error
+         */
+        public function find(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * Edit model.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return \WP_REST_Response|\WP_Error
+         */
+        public function edit(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * Delete model.
+         *
+         * @param \WP_REST_Request $request Rest Request.
+         *
+         * @return \WP_REST_Response|\WP_Error
+         */
+        public function delete(\WP_REST_Request $request)
+        {
+        }
+    }
+    /**
      * Handle integration provider requests through the REST API
      */
     class IntegrationProvidersController
@@ -4559,6 +4972,30 @@ namespace SureCart\Controllers\Rest {
         protected $class = \SureCart\Models\Refund::class;
     }
     /**
+     * Handles webhooks
+     */
+    class RegisteredWebhookController extends \SureCart\Controllers\Rest\RestController
+    {
+        /**
+         * Get the webhook.
+         *
+         * @param \WP_REST_Request $request Request.
+         * @return \WP_REST_Response
+         */
+        public function index($request)
+        {
+        }
+        /**
+         * Resync the webhook.
+         *
+         * @param \WP_REST_Request $request Request.
+         * @return \WP_REST_Response
+         */
+        public function resync($request)
+        {
+        }
+    }
+    /**
      * Handle price requests through the REST API
      */
     class SettingsController
@@ -4664,7 +5101,7 @@ namespace SureCart\Controllers\Rest {
          *
          * @var array
          */
-        protected $models = ['orders' => \SureCart\Models\Order::class, 'abandoned_checkouts' => \SureCart\Models\AbandonedCheckout::class, 'cancellation_reasons' => \SureCart\Models\CancellationReason::class, 'cancellation_acts' => \SureCart\Models\CancellationAct::class];
+        protected $models = ['orders' => \SureCart\Models\Order::class, 'abandoned_checkouts' => \SureCart\Models\AbandonedCheckout::class, 'cancellation_reasons' => \SureCart\Models\CancellationReason::class, 'cancellation_acts' => \SureCart\Models\CancellationAct::class, 'subscriptions' => \SureCart\Models\Subscription::class];
         /**
          * Find model.
          *
@@ -5188,31 +5625,38 @@ namespace SureCart\Controllers\Web {
     class WebhookController
     {
         /**
-         * Map object names to their models.
-         *
-         * @var array
-         */
-        protected $models = ['charge' => \SureCart\Models\Charge::class, 'coupon' => \SureCart\Models\Coupon::class, 'customer' => \SureCart\Models\Customer::class, 'purchase' => \SureCart\Models\Purchase::class, 'price' => \SureCart\Models\Price::class, 'product' => \SureCart\Models\Product::class, 'period' => \SureCart\Models\Period::class, 'order' => \SureCart\Models\Order::class, 'refund' => \SureCart\Models\Refund::class, 'subscription' => \SureCart\Models\Subscription::class, 'invoice' => \SureCart\Models\Invoice::class];
-        /**
-         * Remove the webhook.
+         * Create new webhook for this site.
          *
          * @param \SureCartCore\Requests\RequestInterface $request Request.
-         * @return function
+         * @return ResponseInterface
          */
-        public function remove($request)
+        public function create($request)
         {
         }
         /**
-         * Remove the webhook.
+         * Update the webhook.
          *
          * @param \SureCartCore\Requests\RequestInterface $request Request.
-         * @return function
+         * @return ResponseInterface
          */
-        public function ignore($request)
+        public function update($request)
         {
         }
         /**
-         * Recieve webhook
+         * This deletes and recreates the webhook
+         * in case the signing secret is invalid for some reason.
+         *
+         * @param \SureCartCore\Requests\RequestInterface $request Request.
+         * @return ResponseInterface
+         */
+        public function resync($request)
+        {
+        }
+        /**
+         * Recieve webhook.
+         *
+         * @param \SureCartCore\Requests\RequestInterface $request Request.
+         * @return ResponseInterface
          */
         public function receive($request)
         {
@@ -5223,44 +5667,7 @@ namespace SureCart\Controllers\Web {
          * @param array|\WP_Error $data Data.
          * @return function
          */
-        public function handleResponse($data)
-        {
-        }
-        /**
-         * Perform the action.
-         *
-         * @param object $request Request.
-         *
-         * @return array|\WP_Error
-         */
-        public function doAction($request)
-        {
-        }
-        /**
-         * Replace our dot notation webhook with underscore.
-         *
-         * @param string $type The event type.
-         * @return string
-         */
-        public function createEventName($type = '')
-        {
-        }
-        /**
-         * Get the first object property in data.
-         *
-         * @param object $data Request data.
-         * @return string
-         */
-        public function getObjectId($data)
-        {
-        }
-        /**
-         * Find the object name.
-         *
-         * @param object|array $data Request data.
-         * @return string
-         */
-        public function getObjectName($data)
+        public function handleResponse($id, $data)
         {
         }
     }
@@ -5301,7 +5708,7 @@ namespace SureCart\Database {
          *
          * @return boolean
          */
-        public function shouldMigrate()
+        public function shouldMigrate(): bool
         {
         }
         /**
@@ -5390,6 +5797,72 @@ namespace SureCart\Database {
     }
 }
 namespace SureCart\Database\Tables {
+    /**
+     * The integrations table class.
+     */
+    class IncomingWebhook
+    {
+        /**
+         * Holds the table instance.
+         *
+         * @var \SureCart\Database\Table
+         */
+        protected $table;
+        /**
+         * Version number for the table.
+         * Change this to update the table.
+         *
+         * @var integer
+         */
+        protected $version = 1;
+        /**
+         * Table name.
+         *
+         * @var string
+         */
+        protected $name = 'surecart_incoming_webhooks';
+        /**
+         * Get the table dependency.
+         *
+         * @param \SureCart\Database\Table $table The table dependency.
+         */
+        public function __construct(\SureCart\Database\Table $table)
+        {
+        }
+        /**
+         * Get the table name.
+         *
+         * @return string
+         */
+        public function getName()
+        {
+        }
+        /**
+         * Add relationships custom table
+         * This allows for simple, efficient queries
+         *
+         * @return mixed
+         */
+        public function install()
+        {
+        }
+        /**
+         * Uninstall tables
+         *
+         * @return boolean
+         */
+        public function uninstall()
+        {
+        }
+        /**
+         * Does the table exist?
+         *
+         * @return boolean
+         */
+        public function exists()
+        {
+        }
+    }
     /**
      * The integrations table class.
      */
@@ -5529,6 +6002,26 @@ namespace SureCart\Database {
          * @return void
          */
         public function flushRoles()
+        {
+        }
+    }
+    /**
+     * Run this migration when version changes or for new installations.
+     */
+    class WebhookMigrationsService extends \SureCart\Database\GeneralMigration
+    {
+        /**
+         * The version number when we will run the migration.
+         *
+         * @var string
+         */
+        protected $version = '2.4.0';
+        /**
+         * Run the migration.
+         *
+         * @return void
+         */
+        public function run(): void
         {
         }
     }
@@ -6208,7 +6701,7 @@ namespace SureCart\Integrations {
          * invoke/revoke and quantity update methods.
          *
          * @param Purchase $purchase The purchase.
-         * @param array    $request The request.
+         * @param object   $request The request.
          *
          * @return void
          */
@@ -6807,7 +7300,7 @@ namespace SureCart\Integrations\Elementor {
          *
          * @return void
          */
-        public function widget()
+        public function widget($widgets_manager)
         {
         }
         /**
@@ -11886,6 +12379,66 @@ namespace SureCart\Models {
     /**
      * The integration model.
      */
+    class IncomingWebhook extends \SureCart\Models\DatabaseModel
+    {
+        /**
+         * The integrations table name.
+         *
+         * @var string
+         */
+        protected $table_name = 'surecart_incoming_webhooks';
+        /**
+         * The object name
+         *
+         * @var string
+         */
+        protected $object_name = 'incoming_webhook';
+        /**
+         * Fillable items.
+         *
+         * @var array
+         */
+        protected $fillable = ['id', 'webhook_id', 'processed_at', 'data', 'source', 'created_at', 'updated_at', 'deleted_at'];
+        /**
+         * Force `data` to be an object.
+         *
+         * @param array|object $value The value to set.
+         *
+         * @return void
+         */
+        public function setDataAttribute($value)
+        {
+        }
+        /**
+         * Has this been processed?
+         *
+         * @return boolean
+         */
+        protected function getProcessedAttribute()
+        {
+        }
+        /**
+         * Serialize the data when setting it.
+         *
+         * @param mixed $value The value to set.
+         */
+        protected function setProcessedAttribute($value)
+        {
+        }
+        /**
+         * Delete expired incoming webhooks.
+         *
+         * @param integer $time_ago The number of days ago to delete.
+         *
+         * @return integer The number of rows deleted.
+         */
+        protected function deleteExpired($time_ago = '30 days')
+        {
+        }
+    }
+    /**
+     * The integration model.
+     */
     class Integration extends \SureCart\Models\DatabaseModel
     {
         /**
@@ -12947,6 +13500,134 @@ namespace SureCart\Models {
          */
         protected $object_name = 'refund';
     }
+    /**
+     * Webhook Model.
+     */
+    class Webhook extends \SureCart\Models\Model
+    {
+        /**
+         * Rest API endpoint
+         *
+         * @var string
+         */
+        protected $endpoint = 'webhook_endpoints';
+        /**
+         * Object name
+         *
+         * @var string
+         */
+        protected $object_name = 'webhook_endpoint';
+        /**
+         * Is this cachable?
+         *
+         * @var boolean
+         */
+        protected $cachable = true;
+        /**
+         * Clear cache when webhook endpoints are updated.
+         *
+         * @var string
+         */
+        protected $cache_key = 'webhook_endpoints_updated_at';
+    }
+    /**
+     * Registered Webhook Model.
+     */
+    class RegisteredWebhook extends \SureCart\Models\Webhook
+    {
+        /**
+         * Create the registered webhook.
+         * Creates a webhook for the current site and stores it in the WP options table.
+         *
+         * @param array $args Unused.
+         *
+         * @return $this|\WP_Error
+         */
+        protected function create($args = [])
+        {
+        }
+        /**
+         * Get the registered webhook.
+         *
+         * @return \SureCart\Models\Webhook|\WP_Error;
+         */
+        protected function get()
+        {
+        }
+        /**
+         * Alias for get.
+         *
+         * @param string $id Not used.
+         *
+         * @return \SureCart\Models\Webhook|\WP_Error;
+         */
+        protected function find($id = '')
+        {
+        }
+        /**
+         * Update the model.
+         *
+         * @param array $attributes Attributes to update.
+         * @return $this|false
+         */
+        protected function update($attributes = [])
+        {
+        }
+        /**
+         * Delete the model.
+         *
+         * @return $this|false
+         */
+        protected function delete($id = 0)
+        {
+        }
+        /**
+         * Stores the registrationd webhook data in the WP options table.
+         *
+         * @return \SureCart\Models\WebhookRegistration;
+         */
+        protected function registration()
+        {
+        }
+        /**
+         * Get the listener url.
+         *
+         * @return string
+         */
+        protected function getListenerUrl(): string
+        {
+        }
+        /**
+         * Send test webhook.
+         *
+         * @return \SureCart\Models\Webhook
+         */
+        protected function test()
+        {
+        }
+        /**
+         * Does the current domain match the registered webhook domain?
+         *
+         * @return boolean
+         */
+        protected function currentDomainMatches()
+        {
+        }
+        /**
+         * Get the signing secret.
+         *
+         * @return string
+         */
+        protected function getSigningSecret()
+        {
+        }
+        /**
+         * Has the webhook a signing secret?
+         */
+        protected function hasSigningSecret()
+        {
+        }
+    }
     class ShippingMethod extends \SureCart\Models\Model
     {
         /**
@@ -13217,6 +13898,16 @@ namespace SureCart\Models {
          * @return boolean
          */
         private function checkIfCanUpdateQuantity()
+        {
+        }
+        /**
+         * Get stats for the subscription
+         *
+         * @param array $args Array of arguments for the statistics.
+         *
+         * @return \SureCart\Models\Statistic;
+         */
+        protected function stats($args = [])
         {
         }
     }
@@ -13703,44 +14394,46 @@ namespace SureCart\Models {
         }
     }
     /**
-     * Price model
+     * Webhook Model.
      */
-    class Webhook extends \SureCart\Models\Model
+    class WebhookRegistration
     {
         /**
-         * Rest API endpoint
+         * Registered Webhook option name.
          *
          * @var string
          */
-        protected $endpoint = 'webhook_endpoints';
+        public const REGISTERED_WEBHOOK_KEY = 'surecart_registered_webhook';
         /**
-         * Object name
+         * Deprecated Registered Webhook option name.
          *
          * @var string
          */
-        protected $object_name = 'webhook_endpoint';
+        public const DEPRECATED_WEBHOOK_KEY = 'ce_registered_webhook';
         /**
-         * Get the listener url.
+         * Save the registered webhook.
          *
-         * @return string
+         * @param array $webhook The webhook to save.
+         *
+         * @return bool
          */
-        protected function getListenerUrl()
+        public function save($webhook): bool
         {
         }
         /**
-         * Register webhook for this site
+         * Get registered webhook.
          *
-         * @return $this|false
+         * @return array|null
          */
-        protected function register()
+        public function get()
         {
         }
         /**
-         * Find existing webhook with the same listner url.
+         * Delete the registered webhook.
          *
-         * @return \SureCart\Models\Webhook|false
+         * @return boolean
          */
-        public function findExisting()
+        public function delete(): bool
         {
         }
     }
@@ -16747,6 +17440,99 @@ namespace SureCart\Rest {
     /**
      * Service provider for Price Rest Requests
      */
+    class IncomingWebhooksRestServiceProvider extends \SureCart\Rest\RestServiceProvider implements \SureCart\Rest\RestServiceInterface
+    {
+        /**
+         * Endpoint.
+         *
+         * @var string
+         */
+        protected $endpoint = 'incoming_webhooks';
+        /**
+         * Rest Controller
+         *
+         * @var string
+         */
+        protected $controller = \SureCart\Controllers\Rest\IncomingWebhooksController::class;
+        /**
+         * Methods allowed for the model.
+         *
+         * @var array
+         */
+        protected $methods = ['index', 'create'];
+        /**
+         * Register routes.
+         *
+         * @return void
+         */
+        public function registerRoutes()
+        {
+        }
+        /**
+         * Get our sample schema for a post.
+         *
+         * @return array The sample schema for a post
+         */
+        public function get_item_schema()
+        {
+        }
+        /**
+         * Get the collection params.
+         *
+         * @return array
+         */
+        public function get_collection_params()
+        {
+        }
+        /**
+         * Read permissions.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function get_item_permissions_check($request)
+        {
+        }
+        /**
+         * List permissions.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function get_items_permissions_check($request)
+        {
+        }
+        /**
+         * Create
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function create_item_permissions_check($request)
+        {
+        }
+        /**
+         * Update
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function update_item_permissions_check($request)
+        {
+        }
+        /**
+         * Delete.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function delete_item_permissions_check($request)
+        {
+        }
+    }
+    /**
+     * Service provider for Price Rest Requests
+     */
     class IntegrationProvidersRestServiceProvider extends \SureCart\Rest\RestServiceProvider implements \SureCart\Rest\RestServiceInterface
     {
         /**
@@ -18396,6 +19182,82 @@ namespace SureCart\Rest {
         }
     }
     /**
+     * Service provider for Webhooks Rest Requests
+     */
+    class RegisteredWebhookRestServiceProvider extends \SureCart\Rest\RestServiceProvider implements \SureCart\Rest\RestServiceInterface
+    {
+        /**
+         * Endpoint.
+         *
+         * @var string
+         */
+        protected $endpoint = 'webhook_endpoint';
+        /**
+         * Rest Controller
+         *
+         * @var string
+         */
+        protected $controller = \SureCart\Controllers\Rest\RegisteredWebhookController::class;
+        /**
+         * Methods allowed for the model.
+         *
+         * @var array
+         */
+        protected $methods = ['index'];
+        /**
+         * Register REST Routes
+         *
+         * @return void
+         */
+        public function registerRoutes()
+        {
+        }
+        /**
+         * Get our sample schema for a post.
+         *
+         * @return array The sample schema for a post
+         */
+        public function get_item_schema()
+        {
+        }
+        /**
+         * Anyone can get a specific subscription
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function get_item_permissions_check($request)
+        {
+        }
+        /**
+         * Need priveleges to read checkout sessions.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function get_items_permissions_check($request)
+        {
+        }
+        /**
+         * Anyone can update.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function update_item_permissions_check($request)
+        {
+        }
+        /**
+         * Nobody can delete.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return false
+         */
+        public function delete_item_permissions_check($request)
+        {
+        }
+    }
+    /**
      * Service provider for Price Rest Requests
      */
     class SettingsRestServiceProvider extends \SureCart\Rest\RestServiceProvider implements \SureCart\Rest\RestServiceInterface
@@ -18811,6 +19673,41 @@ namespace SureCart\Rest {
          * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
          */
         public function delete_item_permissions_check($request)
+        {
+        }
+    }
+    /**
+     * Service provider for Shipping Zone Rest Requests
+     */
+    class SiteHealthRestServiceProvider extends \SureCart\Rest\RestServiceProvider implements \SureCart\Rest\RestServiceInterface
+    {
+        /**
+         * Endpoint.
+         *
+         * @var string
+         */
+        protected $endpoint = 'site-health';
+        /**
+         * Methods allowed for the model.
+         *
+         * @var array
+         */
+        protected $methods = [];
+        /**
+         * Register routes required to work.
+         *
+         * @return void
+         */
+        public function registerRoutes()
+        {
+        }
+        /**
+         * Retrieve permissions.
+         *
+         * @param \WP_REST_Request $request Full details about the request.
+         * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
+         */
+        public function permission($check)
         {
         }
     }
@@ -20578,6 +21475,22 @@ namespace SureCart\Support {
         {
         }
     }
+    /**
+     * Handles currency coversion and formatting
+     */
+    class URL
+    {
+        /**
+         * Get the scheme and http host.
+         *
+         * @param string $url The url.
+         *
+         * @return string
+         */
+        public static function getSchemeAndHttpHost(string $url): string
+        {
+        }
+    }
     class UtilityService
     {
         /**
@@ -20739,149 +21652,48 @@ namespace SureCart\View {
 }
 namespace SureCart\Webhooks {
     /**
-     * Handles domain name changes to webhook
-     * Shows notices and allows user to remove old webhooks.
-     */
-    class WebhooksHistoryService
-    {
-        /**
-         * Webhooks service.
-         *
-         * @var \SureCart\Webhooks\WebhooksService
-         */
-        protected $webhooks_service;
-        /**
-         * The option name.
-         *
-         * @var string
-         */
-        protected $registered_webhook = 'ce_registered_webhook';
-        /**
-         * The old domains option name.
-         *
-         * @var string
-         */
-        protected $previous_webhook = 'ce_previous_webhook';
-        /**
-         * Listen to domain changes.
-         *
-         * @return void
-         */
-        public function listen()
-        {
-        }
-        /**
-         * See if the domain changes, then
-         * store the change in the database.
-         *
-         * @param string $option    Name of the updated option.
-         * @param mixed  $old_value The old option value.
-         * @param mixed  $value     The new option value.
-         * @return void
-         */
-        public function maybeStoreWebhookChange($option, $old_value, $value)
-        {
-        }
-        /**
-         * Store the old domain in the database.
-         * We do autoload this option so we can check it on every request.
-         *
-         * @param string $value The old domain.
-         * @return boolean
-         */
-        public function setPreviousWebhook($value)
-        {
-        }
-        /**
-         * Delete any previous webhooks.
-         *
-         * @return boolean
-         */
-        public function deletePreviousWebhook()
-        {
-        }
-        /**
-         * Get the previous webhook.
-         */
-        public function getPreviousWebhook()
-        {
-        }
-        /**
-         * Does this webhook have multiple domains registered?
-         *
-         * @return boolean
-         */
-        public function getPreviousDomain()
-        {
-        }
-        /**
-         * Save the registered webhook.
-         *
-         * @return bool
-         */
-        public function saveRegisteredWebhook($webhook)
-        {
-        }
-        public function getRegisteredWebhook()
-        {
-        }
-        /**
-         * Does the webhook domain match?
-         *
-         * @return boolean
-         */
-        public function domainMatches()
-        {
-        }
-        /**
-         * Undocumented function
-         *
-         * @return void
-         */
-        public function maybeShowDomainChangeNotice()
-        {
-        }
-        /**
-         * Toggle archive action link and text.
-         *
-         * @param \SureCart\Models\Product $product Product model.
-         * @return string
-         */
-        public function actionRemoveWebhook($webhook)
-        {
-        }
-    }
-    /**
-     * WordPress Users service.
+     * Webhooks service.
      */
     class WebhooksService
     {
         /**
-         * Option value for signing key.
+         * The registered webhook.
          *
-         * @var string
+         * @var \SureCart\Models\RegisteredWebhook
          */
-        protected $signing_key = 'sc_webhook_signing_secret';
+        protected $webhook;
         /**
-         * Hold the domain service.
+         * Get the registered webhook.
          *
-         * @var \SureCart\Webhooks\WebhooksHistoryService
+         * @param \SureCart\Models\RegisteredWebhook $webhook The registered webhook.
          */
-        protected $domain_service;
-        /**
-         * Get the domain service.
-         *
-         * @param WebhooksHistoryService $domain_service The domain service.
-         */
-        public function __construct(\SureCart\Webhooks\WebhooksHistoryService $domain_service)
+        public function __construct(\SureCart\Models\RegisteredWebhook $webhook)
         {
         }
         /**
-         * Listen for domain changes.
+         * Bootstrap the integration.
          *
-         * @return function
+         * @return void
          */
-        public function listenForDomainChanges()
+        public function bootstrap()
+        {
+        }
+        /**
+         * Delete any webhook processes older than 30 days.
+         *
+         * @return void
+         */
+        public function deleteOldWebhookProcesses()
+        {
+        }
+        /**
+         * Maybe show a notice to the user that the domain has changed.
+         *
+         * This will prompt them to take action to either update the webhook or create a new webhook.
+         *
+         * @return string|null
+         */
+        public function maybeShowDomainChangeNotice()
         {
         }
         /**
@@ -20889,92 +21701,88 @@ namespace SureCart\Webhooks {
          *
          * @return boolean
          */
-        public function hasToken()
+        public function hasToken(): bool
         {
         }
         /**
-         * Create webhooks for this site.
+         * May be Create webhooks for this site.
          *
          * @return void
          */
-        public function maybeCreateWebooks()
+        public function maybeCreate(): void
         {
         }
         /**
-         * Register webhooks for this site.
+         * Is this localhost?
          *
-         * @return \WP_Error|\SureCart\Models\Webhook;
+         * @return boolean
          */
-        public function register()
+        public function isLocalHost()
         {
         }
         /**
-         * Show a notice if webhook creation failed.
+         * Verify webhooks.
          *
-         * @param  \WP_Error $error Error object.
-         *
-         * @return void
+         * @return function
          */
-        public function showWebhooksErrorNotice(\WP_Error $error)
-        {
-        }
+        // public function verify() {
+        // $webhook = $this->webhook->get();
+        // if ( is_wp_error( $webhook ) ) {
+        // not found, let's recreate one.
+        // if ( 'webhook_endpoint.not_found' === $webhook->get_error_code() ) {
+        // delete saved.
+        // $this->webhook->registration()->delete();
+        // create.
+        // return $this->maybeCreate();
+        // }
+        // handle other errors.
+        // return \SureCart::notices()->add(
+        // [
+        // 'name'  => 'webhooks_general_error',
+        // 'type'  => 'error',
+        // 'title' => esc_html__( 'SureCart Webhooks Error', 'surecart' ),
+        // 'text'  => sprintf( '<p>%s</p>', ( implode( '<br />', $webhook->get_error_messages() ?? [] ) ) ),
+        // ]
+        // );
+        // }
+        // If webhook is not created, show notice.
+        // This should not happen, but just in case.
+        // if ( ! $webhook || empty( $webhook->id ) ) {
+        // return \SureCart::notices()->add(
+        // [
+        // 'name'  => 'webhooks_not_created',
+        // 'type'  => 'error',
+        // 'title' => esc_html__( 'SureCart Webhooks Error', 'surecart' ),
+        // 'text'  => '<p>' . esc_html__( 'Webhooks cannot be created.', 'surecart' ) . '</p>',
+        // ]
+        // );
+        // }
+        // Show the grace period notice.
+        // if ( ! empty( $webhook->erroring_grace_period_ends_at ) ) {
+        // $message   = [];
+        // $message[] = $webhook->erroring_grace_period_ends_at > time() ? esc_html__( 'Your SureCart webhook connection is being monitored due to errors. This can cause issues with any of your SureCart integrations.', 'surecart' ) : esc_html__( 'Your SureCart webhook connection was disabled due to repeated errors. This can cause issues with any of your SureCart integrations.', 'surecart' );
+        // $message[] = $webhook->erroring_grace_period_ends_at > time() ? sprintf( wp_kses( 'These errors will automatically attempt to be retried, however, we will disable this in <strong>%s</strong> if it continues to fail.', 'surecart' ), human_time_diff( $webhook->erroring_grace_period_ends_at ) ) : sprintf( wp_kses( 'It was automatically disabled %s ago.', 'surecart' ), human_time_diff( $webhook->erroring_grace_period_ends_at ) );
+        // $message[] = __( 'If you have already fixed this you can dismiss this notice.', 'surecart' );
+        // $message[] = '<p>
+        // <a href="' . esc_url( \SureCart::getUrl()->editModel( 'resync_webhook', $webhook['id'] ) ) . '" class="button">' . esc_html__( 'Resync Webhook', 'surecart' ) . '</a>
+        // &nbsp;<a href="' . esc_url( untrailingslashit( SURECART_APP_URL ) . '/developer' ) . '" target="_blank">' . esc_html__( 'Troubleshoot Connection', 'surecart' ) . '</a>
+        // </p>';
+        // return \SureCart::notices()->add(
+        // [
+        // 'name'  => 'webhooks_erroring_grace_period_' . $webhook->erroring_grace_period_ends_at,
+        // 'type'  => 'warning',
+        // 'title' => esc_html__( 'SureCart Webhook Connection', 'surecart' ),
+        // 'text'  => sprintf( '<p>%s</p>', ( implode( '<br />', $message ) ) ),
+        // ]
+        // );
+        // }
+        // }
         /**
          * Get the signing secret stored as encrypted data in the WP database.
          *
          * @return string|bool Decrypted value, or false on failure.
          */
         public function getSigningSecret()
-        {
-        }
-        /**
-         * Set the signing secret as encrypted data in the WP database.
-         *
-         * @param string $value The secret.
-         * @return string|bool Encrypted value, or false on failure.
-         */
-        public function setSigningSecret($value)
-        {
-        }
-        /**
-         * Delete the existing signing secret from the WP database.
-         *
-         * @return bool
-         */
-        public function deleteSigningSecret()
-        {
-        }
-        /**
-         * Does the webhook have a signing secret?
-         *
-         * @return boolean
-         */
-        public function hasSigningSecret()
-        {
-        }
-        /**
-         * Save the domain for the webhooks
-         *
-         * @return bool
-         */
-        public function saveRegisteredWebhook($webhook)
-        {
-        }
-        /**
-         * Does the webhook domain match?
-         *
-         * @return boolean
-         */
-        public function domainMatches()
-        {
-        }
-        /**
-         * Broadcast the php hook.
-         * This sets the webhook in a transient so that
-         * it is not accidentally broadcasted twice.
-         *
-         * @return void
-         */
-        public function broadcast($event, $model)
         {
         }
     }
@@ -21171,6 +21979,14 @@ namespace SureCart\WordPress\Admin\Notices {
          * @return void
          */
         public function showResponseNotice($notice = [])
+        {
+        }
+        /**
+         * Add the notice.
+         *
+         * @return void
+         */
+        public function add($notice_data)
         {
         }
         /**
@@ -21765,11 +22581,78 @@ namespace SureCart\WordPress {
         /**
          * Render block data.
          *
-         * @param array $block_data Block data.
+         * @param array $parsed_block Block data.
          *
          * @return array
          */
         public function maybeEnqueueUAGBAssets($parsed_block)
+        {
+        }
+        /**
+         * Filter SC Form Shortcode to load the Spectra Blocks Assets.
+         *
+         * @param string $output Content.
+         * @param array  $attributes Shortcode attributes.
+         * @param string $name Shortcode Tag.
+         *
+         * @return array
+         */
+        public function maybeEnqueueUAGBAssetsForShortcode($output, $attributes, $name)
+        {
+        }
+    }
+    class HealthService
+    {
+        /**
+         * Bootstrap the service.
+         *
+         * @return void
+         */
+        public function bootstrap()
+        {
+        }
+        /**
+         * Add debug information.
+         *
+         * @param array $debug_info Debug List.
+         *
+         * @return array
+         */
+        public function debugInfo($debug_info)
+        {
+        }
+        /**
+         * Register tests for the Status Page
+         *
+         * @param array $tests List of tests.
+         *
+         * @return array
+         */
+        public function tests($tests)
+        {
+        }
+        /**
+         * Neve API test pretty response
+         *
+         * @return array
+         */
+        public function apiTest()
+        {
+        }
+        /**
+         * Check that webhooks are processing normally.
+         *
+         * @return array
+         */
+        public function webhooksProcessingTest()
+        {
+        }
+        /**
+         * Neve API test pretty response
+         *
+         * @return array
+         */
+        public function webhooksTest()
         {
         }
     }
@@ -26615,7 +27498,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param string $version HTTP protocol version
          * @return static
          */
-        public function withProtocolVersion($version);
+        public function withProtocolVersion(string $version);
         /**
          * Retrieves all message header values.
          *
@@ -26650,7 +27533,7 @@ namespace SureCartVendors\Psr\Http\Message {
          *     name using a case-insensitive string comparison. Returns false if
          *     no matching header name is found in the message.
          */
-        public function hasHeader($name);
+        public function hasHeader(string $name);
         /**
          * Retrieves a message header value by the given case-insensitive name.
          *
@@ -26665,7 +27548,7 @@ namespace SureCartVendors\Psr\Http\Message {
          *    header. If the header does not appear in the message, this method MUST
          *    return an empty array.
          */
-        public function getHeader($name);
+        public function getHeader(string $name);
         /**
          * Retrieves a comma-separated string of the values for a single header.
          *
@@ -26685,7 +27568,7 @@ namespace SureCartVendors\Psr\Http\Message {
          *    concatenated together using a comma. If the header does not appear in
          *    the message, this method MUST return an empty string.
          */
-        public function getHeaderLine($name);
+        public function getHeaderLine(string $name);
         /**
          * Return an instance with the provided value replacing the specified header.
          *
@@ -26701,7 +27584,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static
          * @throws \InvalidArgumentException for invalid header names or values.
          */
-        public function withHeader($name, $value);
+        public function withHeader(string $name, $value);
         /**
          * Return an instance with the specified header appended with the given value.
          *
@@ -26718,7 +27601,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static
          * @throws \InvalidArgumentException for invalid header names or values.
          */
-        public function withAddedHeader($name, $value);
+        public function withAddedHeader(string $name, $value);
         /**
          * Return an instance without the specified header.
          *
@@ -26731,7 +27614,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param string $name Case-insensitive header field name to remove.
          * @return static
          */
-        public function withoutHeader($name);
+        public function withoutHeader(string $name);
         /**
          * Gets the body of the message.
          *
@@ -26805,10 +27688,10 @@ namespace SureCartVendors\Psr\Http\Message {
          *
          * @link http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
          *     request-target forms allowed in request messages)
-         * @param mixed $requestTarget
+         * @param string $requestTarget
          * @return static
          */
-        public function withRequestTarget($requestTarget);
+        public function withRequestTarget(string $requestTarget);
         /**
          * Retrieves the HTTP method of the request.
          *
@@ -26830,7 +27713,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static
          * @throws \InvalidArgumentException for invalid HTTP methods.
          */
-        public function withMethod($method);
+        public function withMethod(string $method);
         /**
          * Retrieves the URI instance.
          *
@@ -26871,7 +27754,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param bool $preserveHost Preserve the original state of the Host header.
          * @return static
          */
-        public function withUri(\SureCartVendors\Psr\Http\Message\UriInterface $uri, $preserveHost = false);
+        public function withUri(\SureCartVendors\Psr\Http\Message\UriInterface $uri, bool $preserveHost = false);
     }
     /**
      * Representation of an incoming, server-side HTTP request.
@@ -27085,7 +27968,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param mixed $default Default value to return if the attribute does not exist.
          * @return mixed
          */
-        public function getAttribute($name, $default = null);
+        public function getAttribute(string $name, $default = null);
         /**
          * Return an instance with the specified derived request attribute.
          *
@@ -27101,7 +27984,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param mixed $value The value of the attribute.
          * @return static
          */
-        public function withAttribute($name, $value);
+        public function withAttribute(string $name, $value);
         /**
          * Return an instance that removes the specified derived request attribute.
          *
@@ -27116,7 +27999,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param string $name The attribute name.
          * @return static
          */
-        public function withoutAttribute($name);
+        public function withoutAttribute(string $name);
     }
 }
 namespace SureCartCore\Requests {
@@ -27819,7 +28702,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static
          * @throws \InvalidArgumentException For invalid status code arguments.
          */
-        public function withStatus($code, $reasonPhrase = '');
+        public function withStatus(int $code, string $reasonPhrase = '');
         /**
          * Gets the response reason phrase associated with the status code.
          *
@@ -30908,6 +31791,66 @@ namespace SureCartBlocks\Blocks\CollapsibleRow {
         }
     }
 }
+namespace SureCartBlocks\Blocks\Column {
+    /**
+     * Logout Button Block.
+     */
+    class Block
+    {
+        /**
+         * Optional directory to .json block data files.
+         *
+         * @var string
+         */
+        protected $directory = '';
+        /**
+         * Register the block for dynamic output
+         *
+         * @return void
+         */
+        public function register()
+        {
+        }
+        /**
+         * Get the called class directory path
+         *
+         * @return string
+         */
+        public function getDir()
+        {
+        }
+    }
+}
+namespace SureCartBlocks\Blocks\Columns {
+    /**
+     * Logout Button Block.
+     */
+    class Block
+    {
+        /**
+         * Optional directory to .json block data files.
+         *
+         * @var string
+         */
+        protected $directory = '';
+        /**
+         * Register the block for dynamic output
+         *
+         * @return void
+         */
+        public function register()
+        {
+        }
+        /**
+         * Get the called class directory path
+         *
+         * @return string
+         */
+        public function getDir()
+        {
+        }
+    }
+}
 namespace SureCartBlocks\Blocks\ConditionalForm {
     /**
      * Cart CTA Block.
@@ -32341,7 +33284,7 @@ namespace SureCartBlocks\Util {
 }
 namespace {
     // autoload_real.php @generated by Composer
-    class ComposerAutoloaderInit309572d09328f9c680311733c8b7ee06
+    class ComposerAutoloaderInit16a98641d55e43596fcfbdcdacedd9ad
     {
         private static $loader;
         public static function loadClassLoader($class)
@@ -32356,13 +33299,13 @@ namespace {
     }
 }
 namespace Composer\Autoload {
-    class ComposerStaticInit309572d09328f9c680311733c8b7ee06
+    class ComposerStaticInit16a98641d55e43596fcfbdcdacedd9ad
     {
         public static $files = array('7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php', 'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php', '09274e489ba2f7aa73f570ebb25e818b' => __DIR__ . '/../..' . '/core/core/config.php', '9fd9118c4694682c5336fdfe5d3dc5f0' => __DIR__ . '/../..' . '/core/app-core/config.php', '37e6c5242b1b45513994b42aca1b8bbd' => __DIR__ . '/..' . '/woocommerce/action-scheduler/action-scheduler.php');
-        public static $prefixLengthsPsr4 = array('T' => array('TypistTech\Imposter\Plugin\\' => 27, 'TypistTech\Imposter\\' => 20), 'S' => array('SureCart\\' => 9, 'SureCartCore\\' => 13, 'SureCartBlocks\\' => 15, 'SureCartAppCore\\' => 16), 'P' => array('Psr\Http\Message\\' => 17, 'Psr\Container\\' => 14, 'PluginEver\QueryBuilder\\' => 24), 'G' => array('GuzzleHttp\Psr7\\' => 16), 'C' => array('Composer\Installers\\' => 20));
-        public static $prefixDirsPsr4 = array('TypistTech\Imposter\Plugin\\' => array(0 => __DIR__ . '/..' . '/typisttech/imposter-plugin/src'), 'TypistTech\Imposter\\' => array(0 => __DIR__ . '/..' . '/typisttech/imposter/src'), 'SureCart\\' => array(0 => __DIR__ . '/../..' . '/app/src'), 'SureCartCore\\' => array(0 => __DIR__ . '/../..' . '/core/core/src'), 'SureCartBlocks\\' => array(0 => __DIR__ . '/../..' . '/packages/blocks'), 'SureCartAppCore\\' => array(0 => __DIR__ . '/../..' . '/core/app-core/src'), 'Psr\Http\Message\\' => array(0 => __DIR__ . '/..' . '/psr/http-message/src'), 'Psr\Container\\' => array(0 => __DIR__ . '/..' . '/psr/container/src'), 'PluginEver\QueryBuilder\\' => array(0 => __DIR__ . '/..' . '/sultann/wp-query-builder/src'), 'GuzzleHttp\Psr7\\' => array(0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src'), 'Composer\Installers\\' => array(0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers'));
+        public static $prefixLengthsPsr4 = array('T' => array('TypistTech\Imposter\Plugin\\' => 27, 'TypistTech\Imposter\\' => 20), 'S' => array('SureCart\\' => 9, 'SureCartCore\\' => 13, 'SureCartBlocks\\' => 15, 'SureCartAppCore\\' => 16), 'P' => array('Psr\Http\Message\\' => 17, 'Psr\Container\\' => 14), 'G' => array('GuzzleHttp\Psr7\\' => 16), 'C' => array('Composer\Installers\\' => 20));
+        public static $prefixDirsPsr4 = array('TypistTech\Imposter\Plugin\\' => array(0 => __DIR__ . '/..' . '/typisttech/imposter-plugin/src'), 'TypistTech\Imposter\\' => array(0 => __DIR__ . '/..' . '/typisttech/imposter/src'), 'SureCart\\' => array(0 => __DIR__ . '/../..' . '/app/src'), 'SureCartCore\\' => array(0 => __DIR__ . '/../..' . '/core/core/src'), 'SureCartBlocks\\' => array(0 => __DIR__ . '/../..' . '/packages/blocks'), 'SureCartAppCore\\' => array(0 => __DIR__ . '/../..' . '/core/app-core/src'), 'Psr\Http\Message\\' => array(0 => __DIR__ . '/..' . '/psr/http-message/src'), 'Psr\Container\\' => array(0 => __DIR__ . '/..' . '/psr/container/src'), 'GuzzleHttp\Psr7\\' => array(0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src'), 'Composer\Installers\\' => array(0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers'));
         public static $prefixesPsr0 = array('P' => array('Pimple' => array(0 => __DIR__ . '/..' . '/pimple/pimple/src')));
-        public static $classMap = array('Composer\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php', 'Composer\Installers\AglInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AglInstaller.php', 'Composer\Installers\AimeosInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AimeosInstaller.php', 'Composer\Installers\AnnotateCmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AnnotateCmsInstaller.php', 'Composer\Installers\AsgardInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AsgardInstaller.php', 'Composer\Installers\AttogramInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AttogramInstaller.php', 'Composer\Installers\BaseInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BaseInstaller.php', 'Composer\Installers\BitrixInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BitrixInstaller.php', 'Composer\Installers\BonefishInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BonefishInstaller.php', 'Composer\Installers\CakePHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CakePHPInstaller.php', 'Composer\Installers\ChefInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ChefInstaller.php', 'Composer\Installers\CiviCrmInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CiviCrmInstaller.php', 'Composer\Installers\ClanCatsFrameworkInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ClanCatsFrameworkInstaller.php', 'Composer\Installers\CockpitInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CockpitInstaller.php', 'Composer\Installers\CodeIgniterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CodeIgniterInstaller.php', 'Composer\Installers\Concrete5Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Concrete5Installer.php', 'Composer\Installers\CraftInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CraftInstaller.php', 'Composer\Installers\CroogoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CroogoInstaller.php', 'Composer\Installers\DecibelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DecibelInstaller.php', 'Composer\Installers\DframeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DframeInstaller.php', 'Composer\Installers\DokuWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DokuWikiInstaller.php', 'Composer\Installers\DolibarrInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DolibarrInstaller.php', 'Composer\Installers\DrupalInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DrupalInstaller.php', 'Composer\Installers\ElggInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ElggInstaller.php', 'Composer\Installers\EliasisInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/EliasisInstaller.php', 'Composer\Installers\ExpressionEngineInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ExpressionEngineInstaller.php', 'Composer\Installers\EzPlatformInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/EzPlatformInstaller.php', 'Composer\Installers\FuelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/FuelInstaller.php', 'Composer\Installers\FuelphpInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/FuelphpInstaller.php', 'Composer\Installers\GravInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/GravInstaller.php', 'Composer\Installers\HuradInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/HuradInstaller.php', 'Composer\Installers\ImageCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ImageCMSInstaller.php', 'Composer\Installers\Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Installer.php', 'Composer\Installers\ItopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ItopInstaller.php', 'Composer\Installers\JoomlaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/JoomlaInstaller.php', 'Composer\Installers\KanboardInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KanboardInstaller.php', 'Composer\Installers\KirbyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KirbyInstaller.php', 'Composer\Installers\KnownInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KnownInstaller.php', 'Composer\Installers\KodiCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KodiCMSInstaller.php', 'Composer\Installers\KohanaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KohanaInstaller.php', 'Composer\Installers\LanManagementSystemInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LanManagementSystemInstaller.php', 'Composer\Installers\LaravelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LaravelInstaller.php', 'Composer\Installers\LavaLiteInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LavaLiteInstaller.php', 'Composer\Installers\LithiumInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LithiumInstaller.php', 'Composer\Installers\MODULEWorkInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MODULEWorkInstaller.php', 'Composer\Installers\MODXEvoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MODXEvoInstaller.php', 'Composer\Installers\MagentoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MagentoInstaller.php', 'Composer\Installers\MajimaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MajimaInstaller.php', 'Composer\Installers\MakoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MakoInstaller.php', 'Composer\Installers\MantisBTInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MantisBTInstaller.php', 'Composer\Installers\MauticInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MauticInstaller.php', 'Composer\Installers\MayaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MayaInstaller.php', 'Composer\Installers\MediaWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MediaWikiInstaller.php', 'Composer\Installers\MiaoxingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MiaoxingInstaller.php', 'Composer\Installers\MicroweberInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MicroweberInstaller.php', 'Composer\Installers\ModxInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ModxInstaller.php', 'Composer\Installers\MoodleInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MoodleInstaller.php', 'Composer\Installers\OctoberInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OctoberInstaller.php', 'Composer\Installers\OntoWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OntoWikiInstaller.php', 'Composer\Installers\OsclassInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OsclassInstaller.php', 'Composer\Installers\OxidInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OxidInstaller.php', 'Composer\Installers\PPIInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PPIInstaller.php', 'Composer\Installers\PantheonInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PantheonInstaller.php', 'Composer\Installers\PhiftyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhiftyInstaller.php', 'Composer\Installers\PhpBBInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhpBBInstaller.php', 'Composer\Installers\PimcoreInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PimcoreInstaller.php', 'Composer\Installers\PiwikInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PiwikInstaller.php', 'Composer\Installers\PlentymarketsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PlentymarketsInstaller.php', 'Composer\Installers\Plugin' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Plugin.php', 'Composer\Installers\PortoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PortoInstaller.php', 'Composer\Installers\PrestashopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PrestashopInstaller.php', 'Composer\Installers\ProcessWireInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ProcessWireInstaller.php', 'Composer\Installers\PuppetInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PuppetInstaller.php', 'Composer\Installers\PxcmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PxcmsInstaller.php', 'Composer\Installers\RadPHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RadPHPInstaller.php', 'Composer\Installers\ReIndexInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ReIndexInstaller.php', 'Composer\Installers\Redaxo5Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Redaxo5Installer.php', 'Composer\Installers\RedaxoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RedaxoInstaller.php', 'Composer\Installers\RoundcubeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RoundcubeInstaller.php', 'Composer\Installers\SMFInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SMFInstaller.php', 'Composer\Installers\ShopwareInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ShopwareInstaller.php', 'Composer\Installers\SilverStripeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SilverStripeInstaller.php', 'Composer\Installers\SiteDirectInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SiteDirectInstaller.php', 'Composer\Installers\StarbugInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/StarbugInstaller.php', 'Composer\Installers\SyDESInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyDESInstaller.php', 'Composer\Installers\SyliusInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyliusInstaller.php', 'Composer\Installers\Symfony1Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Symfony1Installer.php', 'Composer\Installers\TYPO3CmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3CmsInstaller.php', 'Composer\Installers\TYPO3FlowInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3FlowInstaller.php', 'Composer\Installers\TaoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TaoInstaller.php', 'Composer\Installers\TastyIgniterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TastyIgniterInstaller.php', 'Composer\Installers\TheliaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TheliaInstaller.php', 'Composer\Installers\TuskInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TuskInstaller.php', 'Composer\Installers\UserFrostingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/UserFrostingInstaller.php', 'Composer\Installers\VanillaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VanillaInstaller.php', 'Composer\Installers\VgmcpInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VgmcpInstaller.php', 'Composer\Installers\WHMCSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WHMCSInstaller.php', 'Composer\Installers\WinterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WinterInstaller.php', 'Composer\Installers\WolfCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WolfCMSInstaller.php', 'Composer\Installers\WordPressInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WordPressInstaller.php', 'Composer\Installers\YawikInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/YawikInstaller.php', 'Composer\Installers\ZendInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZendInstaller.php', 'Composer\Installers\ZikulaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZikulaInstaller.php', 'SureCartAppCore\AppCore\AppCore' => __DIR__ . '/../..' . '/core/app-core/src/AppCore/AppCore.php', 'SureCartAppCore\AppCore\AppCoreServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/AppCore/AppCoreServiceProvider.php', 'SureCartAppCore\Application\ApplicationMixin' => __DIR__ . '/../..' . '/core/app-core/src/Application/ApplicationMixin.php', 'SureCartAppCore\Assets\Assets' => __DIR__ . '/../..' . '/core/app-core/src/Assets/Assets.php', 'SureCartAppCore\Assets\AssetsServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Assets/AssetsServiceProvider.php', 'SureCartAppCore\Assets\Manifest' => __DIR__ . '/../..' . '/core/app-core/src/Assets/Manifest.php', 'SureCartAppCore\Avatar\Avatar' => __DIR__ . '/../..' . '/core/app-core/src/Avatar/Avatar.php', 'SureCartAppCore\Avatar\AvatarServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Avatar/AvatarServiceProvider.php', 'SureCartAppCore\Concerns\JsonFileInvalidException' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/JsonFileInvalidException.php', 'SureCartAppCore\Concerns\JsonFileNotFoundException' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/JsonFileNotFoundException.php', 'SureCartAppCore\Concerns\ReadsJsonTrait' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/ReadsJsonTrait.php', 'SureCartAppCore\Config\Config' => __DIR__ . '/../..' . '/core/app-core/src/Config/Config.php', 'SureCartAppCore\Config\ConfigServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Config/ConfigServiceProvider.php', 'SureCartAppCore\Image\Image' => __DIR__ . '/../..' . '/core/app-core/src/Image/Image.php', 'SureCartAppCore\Image\ImageServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Image/ImageServiceProvider.php', 'SureCartAppCore\Sidebar\Sidebar' => __DIR__ . '/../..' . '/core/app-core/src/Sidebar/Sidebar.php', 'SureCartAppCore\Sidebar\SidebarServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Sidebar/SidebarServiceProvider.php', 'SureCartBlocks\Blocks\AddToCartButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/AddToCartButton/Block.php', 'SureCartBlocks\Blocks\Address\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Address/Block.php', 'SureCartBlocks\Blocks\BaseBlock' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BaseBlock.php', 'SureCartBlocks\Blocks\BlockService' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BlockService.php', 'SureCartBlocks\Blocks\BlockServiceProvider' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BlockServiceProvider.php', 'SureCartBlocks\Blocks\BuyButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BuyButton/Block.php', 'SureCartBlocks\Blocks\CartBlock' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartBlock.php', 'SureCartBlocks\Blocks\CartBumpLineItem\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartBumpLineItem/Block.php', 'SureCartBlocks\Blocks\CartCoupon\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartCoupon/Block.php', 'SureCartBlocks\Blocks\CartMenuButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartMenuButton/Block.php', 'SureCartBlocks\Blocks\CartSubmit\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartSubmit/Block.php', 'SureCartBlocks\Blocks\CartSubtotal\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartSubtotal/Block.php', 'SureCartBlocks\Blocks\Cart\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Cart/Block.php', 'SureCartBlocks\Blocks\CheckoutForm\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CheckoutForm/Block.php', 'SureCartBlocks\Blocks\CollapsibleRow\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CollapsibleRow/Block.php', 'SureCartBlocks\Blocks\ConditionalForm\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/ConditionalForm/Block.php', 'SureCartBlocks\Blocks\Confirmation\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Confirmation/Block.php', 'SureCartBlocks\Blocks\Coupon\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Coupon/Block.php', 'SureCartBlocks\Blocks\CustomerDashboardButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CustomerDashboardButton/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerBillingDetails\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerBillingDetails/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDashboardArea\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDashboardArea/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDashboard\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDashboard/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDownloads\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDownloads/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerOrders\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerOrders/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerPaymentMethods\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerPaymentMethods/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerSubscriptions\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerSubscriptions/Block.php', 'SureCartBlocks\Blocks\Dashboard\DashboardPage' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardPage.php', 'SureCartBlocks\Blocks\Dashboard\DashboardPage\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardPage/Block.php', 'SureCartBlocks\Blocks\Dashboard\DashboardTab\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardTab/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerCharges\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerCharges/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerInvoices\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerInvoices/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerShippingAddress\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerShippingAddress/Block.php', 'SureCartBlocks\Blocks\Dashboard\OrderDownloads\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/OrderDownloads/Block.php', 'SureCartBlocks\Blocks\Dashboard\WordPressAccount\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/WordPressAccount/Block.php', 'SureCartBlocks\Blocks\Divider\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Divider/Block.php', 'SureCartBlocks\Blocks\Email\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Email/Block.php', 'SureCartBlocks\Blocks\Form\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Form/Block.php', 'SureCartBlocks\Blocks\LogoutButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/LogoutButton/Block.php', 'SureCartBlocks\Blocks\OrderConfirmationLineItems\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/OrderConfirmationLineItems/Block.php', 'SureCartBlocks\Blocks\Password\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Password/Block.php', 'SureCartBlocks\Blocks\Payment\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Payment/Block.php', 'SureCartBlocks\Blocks\ProductItemList\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/ProductItemList/Block.php', 'SureCartBlocks\Blocks\Product\BuyButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/BuyButton/Block.php', 'SureCartBlocks\Blocks\Product\BuyButtons\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/BuyButtons/Block.php', 'SureCartBlocks\Blocks\Product\Description\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Description/Block.php', 'SureCartBlocks\Blocks\Product\Media\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Media/Block.php', 'SureCartBlocks\Blocks\Product\PriceChoices\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/PriceChoices/Block.php', 'SureCartBlocks\Blocks\Product\Price\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Price/Block.php', 'SureCartBlocks\Blocks\Product\Quantity\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Quantity/Block.php', 'SureCartBlocks\Blocks\Product\Title\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Title/Block.php', 'SureCartBlocks\Blocks\StoreLogo\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/StoreLogo/Block.php', 'SureCartBlocks\Controllers\BaseController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/BaseController.php', 'SureCartBlocks\Controllers\ChargeController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/ChargeController.php', 'SureCartBlocks\Controllers\CustomerController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/CustomerController.php', 'SureCartBlocks\Controllers\DownloadController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/DownloadController.php', 'SureCartBlocks\Controllers\InvoiceController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/InvoiceController.php', 'SureCartBlocks\Controllers\OrderController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/OrderController.php', 'SureCartBlocks\Controllers\PaymentMethodController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/PaymentMethodController.php', 'SureCartBlocks\Controllers\SubscriptionController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/SubscriptionController.php', 'SureCartBlocks\Controllers\UserController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/UserController.php', 'SureCartBlocks\Util\BlockStyleAttributes' => __DIR__ . '/../..' . '/packages/blocks/Util/BlockStyleAttributes.php', 'SureCartCore\Application\Application' => __DIR__ . '/../..' . '/core/core/src/Application/Application.php', 'SureCartCore\Application\ApplicationMixin' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationMixin.php', 'SureCartCore\Application\ApplicationServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationServiceProvider.php', 'SureCartCore\Application\ApplicationTrait' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationTrait.php', 'SureCartCore\Application\ClosureFactory' => __DIR__ . '/../..' . '/core/core/src/Application/ClosureFactory.php', 'SureCartCore\Application\GenericFactory' => __DIR__ . '/../..' . '/core/core/src/Application/GenericFactory.php', 'SureCartCore\Application\HasAliasesTrait' => __DIR__ . '/../..' . '/core/core/src/Application/HasAliasesTrait.php', 'SureCartCore\Application\HasContainerTrait' => __DIR__ . '/../..' . '/core/core/src/Application/HasContainerTrait.php', 'SureCartCore\Application\LoadsServiceProvidersTrait' => __DIR__ . '/../..' . '/core/core/src/Application/LoadsServiceProvidersTrait.php', 'SureCartCore\Controllers\ControllersServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Controllers/ControllersServiceProvider.php', 'SureCartCore\Controllers\WordPressController' => __DIR__ . '/../..' . '/core/core/src/Controllers/WordPressController.php', 'SureCartCore\Csrf\Csrf' => __DIR__ . '/../..' . '/core/core/src/Csrf/Csrf.php', 'SureCartCore\Csrf\CsrfMiddleware' => __DIR__ . '/../..' . '/core/core/src/Csrf/CsrfMiddleware.php', 'SureCartCore\Csrf\CsrfServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Csrf/CsrfServiceProvider.php', 'SureCartCore\Csrf\InvalidCsrfTokenException' => __DIR__ . '/../..' . '/core/core/src/Csrf/InvalidCsrfTokenException.php', 'SureCartCore\Exceptions\ClassNotFoundException' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ClassNotFoundException.php', 'SureCartCore\Exceptions\ConfigurationException' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ConfigurationException.php', 'SureCartCore\Exceptions\ErrorHandler' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ErrorHandler.php', 'SureCartCore\Exceptions\ErrorHandlerInterface' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ErrorHandlerInterface.php', 'SureCartCore\Exceptions\Exception' => __DIR__ . '/../..' . '/core/core/src/Exceptions/Exception.php', 'SureCartCore\Exceptions\ExceptionsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ExceptionsServiceProvider.php', 'SureCartCore\Exceptions\Whoops\DebugDataProvider' => __DIR__ . '/../..' . '/core/core/src/Exceptions/Whoops/DebugDataProvider.php', 'SureCartCore\Flash\Flash' => __DIR__ . '/../..' . '/core/core/src/Flash/Flash.php', 'SureCartCore\Flash\FlashMiddleware' => __DIR__ . '/../..' . '/core/core/src/Flash/FlashMiddleware.php', 'SureCartCore\Flash\FlashServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Flash/FlashServiceProvider.php', 'SureCartCore\Helpers\Arguments' => __DIR__ . '/../..' . '/core/core/src/Helpers/Arguments.php', 'SureCartCore\Helpers\Handler' => __DIR__ . '/../..' . '/core/core/src/Helpers/Handler.php', 'SureCartCore\Helpers\HandlerFactory' => __DIR__ . '/../..' . '/core/core/src/Helpers/HandlerFactory.php', 'SureCartCore\Helpers\HasAttributesInterface' => __DIR__ . '/../..' . '/core/core/src/Helpers/HasAttributesInterface.php', 'SureCartCore\Helpers\HasAttributesTrait' => __DIR__ . '/../..' . '/core/core/src/Helpers/HasAttributesTrait.php', 'SureCartCore\Helpers\MixedType' => __DIR__ . '/../..' . '/core/core/src/Helpers/MixedType.php', 'SureCartCore\Helpers\Url' => __DIR__ . '/../..' . '/core/core/src/Helpers/Url.php', 'SureCartCore\Input\OldInput' => __DIR__ . '/../..' . '/core/core/src/Input/OldInput.php', 'SureCartCore\Input\OldInputMiddleware' => __DIR__ . '/../..' . '/core/core/src/Input/OldInputMiddleware.php', 'SureCartCore\Input\OldInputServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Input/OldInputServiceProvider.php', 'SureCartCore\Kernels\HttpKernel' => __DIR__ . '/../..' . '/core/core/src/Kernels/HttpKernel.php', 'SureCartCore\Kernels\HttpKernelInterface' => __DIR__ . '/../..' . '/core/core/src/Kernels/HttpKernelInterface.php', 'SureCartCore\Kernels\KernelsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Kernels/KernelsServiceProvider.php', 'SureCartCore\Middleware\ControllerMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/ControllerMiddleware.php', 'SureCartCore\Middleware\ExecutesMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/ExecutesMiddlewareTrait.php', 'SureCartCore\Middleware\HasControllerMiddlewareInterface' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasControllerMiddlewareInterface.php', 'SureCartCore\Middleware\HasControllerMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasControllerMiddlewareTrait.php', 'SureCartCore\Middleware\HasMiddlewareDefinitionsInterface' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasMiddlewareDefinitionsInterface.php', 'SureCartCore\Middleware\HasMiddlewareDefinitionsTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasMiddlewareDefinitionsTrait.php', 'SureCartCore\Middleware\MiddlewareServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Middleware/MiddlewareServiceProvider.php', 'SureCartCore\Middleware\ReadsHandlerMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/ReadsHandlerMiddlewareTrait.php', 'SureCartCore\Middleware\UserCanMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserCanMiddleware.php', 'SureCartCore\Middleware\UserLoggedInMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserLoggedInMiddleware.php', 'SureCartCore\Middleware\UserLoggedOutMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserLoggedOutMiddleware.php', 'SureCartCore\Requests\Request' => __DIR__ . '/../..' . '/core/core/src/Requests/Request.php', 'SureCartCore\Requests\RequestInterface' => __DIR__ . '/../..' . '/core/core/src/Requests/RequestInterface.php', 'SureCartCore\Requests\RequestsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Requests/RequestsServiceProvider.php', 'SureCartCore\Responses\ConvertsToResponseTrait' => __DIR__ . '/../..' . '/core/core/src/Responses/ConvertsToResponseTrait.php', 'SureCartCore\Responses\RedirectResponse' => __DIR__ . '/../..' . '/core/core/src/Responses/RedirectResponse.php', 'SureCartCore\Responses\ResponsableInterface' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponsableInterface.php', 'SureCartCore\Responses\ResponseService' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponseService.php', 'SureCartCore\Responses\ResponsesServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponsesServiceProvider.php', 'SureCartCore\Routing\Conditions\AdminCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/AdminCondition.php', 'SureCartCore\Routing\Conditions\AjaxCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/AjaxCondition.php', 'SureCartCore\Routing\Conditions\CanFilterQueryInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/CanFilterQueryInterface.php', 'SureCartCore\Routing\Conditions\ConditionFactory' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/ConditionFactory.php', 'SureCartCore\Routing\Conditions\ConditionInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/ConditionInterface.php', 'SureCartCore\Routing\Conditions\CustomCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/CustomCondition.php', 'SureCartCore\Routing\Conditions\MultipleCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/MultipleCondition.php', 'SureCartCore\Routing\Conditions\NegateCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/NegateCondition.php', 'SureCartCore\Routing\Conditions\PostIdCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostIdCondition.php', 'SureCartCore\Routing\Conditions\PostSlugCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostSlugCondition.php', 'SureCartCore\Routing\Conditions\PostStatusCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostStatusCondition.php', 'SureCartCore\Routing\Conditions\PostTemplateCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostTemplateCondition.php', 'SureCartCore\Routing\Conditions\PostTypeCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostTypeCondition.php', 'SureCartCore\Routing\Conditions\QueryVarCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/QueryVarCondition.php', 'SureCartCore\Routing\Conditions\UrlCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/UrlCondition.php', 'SureCartCore\Routing\Conditions\UrlableInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/UrlableInterface.php', 'SureCartCore\Routing\HasQueryFilterInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/HasQueryFilterInterface.php', 'SureCartCore\Routing\HasQueryFilterTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/HasQueryFilterTrait.php', 'SureCartCore\Routing\HasRoutesInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/HasRoutesInterface.php', 'SureCartCore\Routing\HasRoutesTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/HasRoutesTrait.php', 'SureCartCore\Routing\NotFoundException' => __DIR__ . '/../..' . '/core/core/src/Routing/NotFoundException.php', 'SureCartCore\Routing\Route' => __DIR__ . '/../..' . '/core/core/src/Routing/Route.php', 'SureCartCore\Routing\RouteBlueprint' => __DIR__ . '/../..' . '/core/core/src/Routing/RouteBlueprint.php', 'SureCartCore\Routing\RouteInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/RouteInterface.php', 'SureCartCore\Routing\Router' => __DIR__ . '/../..' . '/core/core/src/Routing/Router.php', 'SureCartCore\Routing\RoutingServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Routing/RoutingServiceProvider.php', 'SureCartCore\Routing\SortsMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/SortsMiddlewareTrait.php', 'SureCartCore\ServiceProviders\ExtendsConfigTrait' => __DIR__ . '/../..' . '/core/core/src/ServiceProviders/ExtendsConfigTrait.php', 'SureCartCore\ServiceProviders\ServiceProviderInterface' => __DIR__ . '/../..' . '/core/core/src/ServiceProviders/ServiceProviderInterface.php', 'SureCartCore\Support\Arr' => __DIR__ . '/../..' . '/core/core/src/Support/Arr.php', 'SureCartCore\View\HasContextInterface' => __DIR__ . '/../..' . '/core/core/src/View/HasContextInterface.php', 'SureCartCore\View\HasContextTrait' => __DIR__ . '/../..' . '/core/core/src/View/HasContextTrait.php', 'SureCartCore\View\HasNameTrait' => __DIR__ . '/../..' . '/core/core/src/View/HasNameTrait.php', 'SureCartCore\View\NameProxyViewEngine' => __DIR__ . '/../..' . '/core/core/src/View/NameProxyViewEngine.php', 'SureCartCore\View\PhpView' => __DIR__ . '/../..' . '/core/core/src/View/PhpView.php', 'SureCartCore\View\PhpViewEngine' => __DIR__ . '/../..' . '/core/core/src/View/PhpViewEngine.php', 'SureCartCore\View\PhpViewFilesystemFinder' => __DIR__ . '/../..' . '/core/core/src/View/PhpViewFilesystemFinder.php', 'SureCartCore\View\ViewEngineInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewEngineInterface.php', 'SureCartCore\View\ViewException' => __DIR__ . '/../..' . '/core/core/src/View/ViewException.php', 'SureCartCore\View\ViewFinderInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewFinderInterface.php', 'SureCartCore\View\ViewInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewInterface.php', 'SureCartCore\View\ViewNotFoundException' => __DIR__ . '/../..' . '/core/core/src/View/ViewNotFoundException.php', 'SureCartCore\View\ViewService' => __DIR__ . '/../..' . '/core/core/src/View/ViewService.php', 'SureCartCore\View\ViewServiceProvider' => __DIR__ . '/../..' . '/core/core/src/View/ViewServiceProvider.php', 'SureCartVendors\GuzzleHttp\Psr7\AppendStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/AppendStream.php', 'SureCartVendors\GuzzleHttp\Psr7\BufferStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/BufferStream.php', 'SureCartVendors\GuzzleHttp\Psr7\CachingStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/CachingStream.php', 'SureCartVendors\GuzzleHttp\Psr7\DroppingStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/DroppingStream.php', 'SureCartVendors\GuzzleHttp\Psr7\FnStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/FnStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Header' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Header.php', 'SureCartVendors\GuzzleHttp\Psr7\InflateStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/InflateStream.php', 'SureCartVendors\GuzzleHttp\Psr7\LazyOpenStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/LazyOpenStream.php', 'SureCartVendors\GuzzleHttp\Psr7\LimitStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/LimitStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Message' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Message.php', 'SureCartVendors\GuzzleHttp\Psr7\MessageTrait' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MessageTrait.php', 'SureCartVendors\GuzzleHttp\Psr7\MimeType' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MimeType.php', 'SureCartVendors\GuzzleHttp\Psr7\MultipartStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MultipartStream.php', 'SureCartVendors\GuzzleHttp\Psr7\NoSeekStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/NoSeekStream.php', 'SureCartVendors\GuzzleHttp\Psr7\PumpStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/PumpStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Query' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Query.php', 'SureCartVendors\GuzzleHttp\Psr7\Request' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Request.php', 'SureCartVendors\GuzzleHttp\Psr7\Response' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Response.php', 'SureCartVendors\GuzzleHttp\Psr7\Rfc7230' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc7230.php', 'SureCartVendors\GuzzleHttp\Psr7\ServerRequest' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/ServerRequest.php', 'SureCartVendors\GuzzleHttp\Psr7\Stream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Stream.php', 'SureCartVendors\GuzzleHttp\Psr7\StreamDecoratorTrait' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/StreamDecoratorTrait.php', 'SureCartVendors\GuzzleHttp\Psr7\StreamWrapper' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/StreamWrapper.php', 'SureCartVendors\GuzzleHttp\Psr7\UploadedFile' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UploadedFile.php', 'SureCartVendors\GuzzleHttp\Psr7\Uri' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Uri.php', 'SureCartVendors\GuzzleHttp\Psr7\UriComparator' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriComparator.php', 'SureCartVendors\GuzzleHttp\Psr7\UriNormalizer' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriNormalizer.php', 'SureCartVendors\GuzzleHttp\Psr7\UriResolver' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriResolver.php', 'SureCartVendors\GuzzleHttp\Psr7\Utils' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Utils.php', 'SureCartVendors\Pimple\Container' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Container.php', 'SureCartVendors\Pimple\Exception\ExpectedInvokableException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/ExpectedInvokableException.php', 'SureCartVendors\Pimple\Exception\FrozenServiceException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/FrozenServiceException.php', 'SureCartVendors\Pimple\Exception\InvalidServiceIdentifierException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/InvalidServiceIdentifierException.php', 'SureCartVendors\Pimple\Exception\UnknownIdentifierException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/UnknownIdentifierException.php', 'SureCartVendors\Pimple\Psr11\Container' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Psr11/Container.php', 'SureCartVendors\Pimple\Psr11\ServiceLocator' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Psr11/ServiceLocator.php', 'SureCartVendors\Pimple\ServiceIterator' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/ServiceIterator.php', 'SureCartVendors\Pimple\ServiceProviderInterface' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/ServiceProviderInterface.php', 'SureCartVendors\Pimple\Tests\Fixtures\Invokable' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/Invokable.php', 'SureCartVendors\Pimple\Tests\Fixtures\NonInvokable' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/NonInvokable.php', 'SureCartVendors\Pimple\Tests\Fixtures\PimpleServiceProvider' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/PimpleServiceProvider.php', 'SureCartVendors\Pimple\Tests\Fixtures\Service' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/Service.php', 'SureCartVendors\Pimple\Tests\PimpleServiceProviderInterfaceTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/PimpleServiceProviderInterfaceTest.php', 'SureCartVendors\Pimple\Tests\PimpleTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/PimpleTest.php', 'SureCartVendors\Pimple\Tests\Psr11\ContainerTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ContainerTest.php', 'SureCartVendors\Pimple\Tests\Psr11\ServiceLocatorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ServiceLocatorTest.php', 'SureCartVendors\Pimple\Tests\ServiceIteratorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/ServiceIteratorTest.php', 'SureCartVendors\PluginEver\QueryBuilder\Collection' => __DIR__ . '/..' . '/sultann/wp-query-builder/src/Collection.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\Arrayable' => __DIR__ . '/..' . '/sultann/wp-query-builder/src/Interfaces/Arrayable.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\JSONable' => __DIR__ . '/..' . '/sultann/wp-query-builder/src/Interfaces/JSONable.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\Stringable' => __DIR__ . '/..' . '/sultann/wp-query-builder/src/Interfaces/Stringable.php', 'SureCartVendors\PluginEver\QueryBuilder\Query' => __DIR__ . '/..' . '/sultann/wp-query-builder/src/Query.php', 'SureCartVendors\Psr\Container\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php', 'SureCartVendors\Psr\Container\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php', 'SureCartVendors\Psr\Container\NotFoundExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/NotFoundExceptionInterface.php', 'SureCartVendors\Psr\Http\Message\MessageInterface' => __DIR__ . '/..' . '/psr/http-message/src/MessageInterface.php', 'SureCartVendors\Psr\Http\Message\RequestInterface' => __DIR__ . '/..' . '/psr/http-message/src/RequestInterface.php', 'SureCartVendors\Psr\Http\Message\ResponseInterface' => __DIR__ . '/..' . '/psr/http-message/src/ResponseInterface.php', 'SureCartVendors\Psr\Http\Message\ServerRequestInterface' => __DIR__ . '/..' . '/psr/http-message/src/ServerRequestInterface.php', 'SureCartVendors\Psr\Http\Message\StreamInterface' => __DIR__ . '/..' . '/psr/http-message/src/StreamInterface.php', 'SureCartVendors\Psr\Http\Message\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php', 'SureCartVendors\Psr\Http\Message\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php', 'SureCart\Account\AccountService' => __DIR__ . '/../..' . '/app/src/Account/AccountService.php', 'SureCart\Account\AccountServiceProvider' => __DIR__ . '/../..' . '/app/src/Account/AccountServiceProvider.php', 'SureCart\Activation\ActivationService' => __DIR__ . '/../..' . '/app/src/Activation/ActivationService.php', 'SureCart\Activation\ActivationServiceProvider' => __DIR__ . '/../..' . '/app/src/Activation/ActivationServiceProvider.php', 'SureCart\Background\BackgroundServiceProvider' => __DIR__ . '/../..' . '/app/src/Background/BackgroundServiceProvider.php', 'SureCart\Background\CustomerSyncService' => __DIR__ . '/../..' . '/app/src/Background/CustomerSyncService.php', 'SureCart\Background\SyncService' => __DIR__ . '/../..' . '/app/src/Background/SyncService.php', 'SureCart\BlockLibrary\BlockPatternsService' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockPatternsService.php', 'SureCart\BlockLibrary\BlockService' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockService.php', 'SureCart\BlockLibrary\BlockServiceProvider' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockServiceProvider.php', 'SureCart\Cart\CartService' => __DIR__ . '/../..' . '/app/src/Cart/CartService.php', 'SureCart\Cart\CartServiceProvider' => __DIR__ . '/../..' . '/app/src/Cart/CartServiceProvider.php', 'SureCart\Concerns\Arrayable' => __DIR__ . '/../..' . '/app/src/Concerns/Arrayable.php', 'SureCart\Concerns\HasBlockTheme' => __DIR__ . '/../..' . '/app/src/Concerns/HasBlockTheme.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutListTable.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutScriptsController.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutStatsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutStatsScriptsController.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutViewController.php', 'SureCart\Controllers\Admin\Account' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Account.php', 'SureCart\Controllers\Admin\AdminController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/AdminController.php', 'SureCart\Controllers\Admin\Bumps\BumpScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpScriptsController.php', 'SureCart\Controllers\Admin\Bumps\BumpsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpsController.php', 'SureCart\Controllers\Admin\Bumps\BumpsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpsListTable.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsController.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsListTable.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsScriptsController.php', 'SureCart\Controllers\Admin\Cart\CartController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Cart/CartController.php', 'SureCart\Controllers\Admin\Cart\CartScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Cart/CartScriptsController.php', 'SureCart\Controllers\Admin\Checkouts\CheckoutScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Checkouts/CheckoutScriptsController.php', 'SureCart\Controllers\Admin\Checkouts\CheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Checkouts/CheckoutsController.php', 'SureCart\Controllers\Admin\Connection' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Connection.php', 'SureCart\Controllers\Admin\Coupons\CouponScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponScriptsController.php', 'SureCart\Controllers\Admin\Coupons\CouponsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponsController.php', 'SureCart\Controllers\Admin\Coupons\CouponsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponsListTable.php', 'SureCart\Controllers\Admin\Customers\CustomersController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersController.php', 'SureCart\Controllers\Admin\Customers\CustomersListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersListTable.php', 'SureCart\Controllers\Admin\Customers\CustomersScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersScriptsController.php', 'SureCart\Controllers\Admin\Dashboard\DashboardController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Dashboard/DashboardController.php', 'SureCart\Controllers\Admin\Dashboard\DashboardScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Dashboard/DashboardScriptsController.php', 'SureCart\Controllers\Admin\Invoices\InvoiceScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoiceScriptsController.php', 'SureCart\Controllers\Admin\Invoices\InvoicesListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoicesListTable.php', 'SureCart\Controllers\Admin\Invoices\InvoicesViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoicesViewController.php', 'SureCart\Controllers\Admin\Licenses\LicensesController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesController.php', 'SureCart\Controllers\Admin\Licenses\LicensesListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesListTable.php', 'SureCart\Controllers\Admin\Licenses\LicensesScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesScriptsController.php', 'SureCart\Controllers\Admin\Onboarding\OnboardingController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Onboarding/OnboardingController.php', 'SureCart\Controllers\Admin\Onboarding\OnboardingScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Onboarding/OnboardingScriptsController.php', 'SureCart\Controllers\Admin\Orders\OrderScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrderScriptsController.php', 'SureCart\Controllers\Admin\Orders\OrdersListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrdersListTable.php', 'SureCart\Controllers\Admin\Orders\OrdersViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrdersViewController.php', 'SureCart\Controllers\Admin\PluginSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/PluginSettings.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsController.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsListTable.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsScriptsController.php', 'SureCart\Controllers\Admin\Products\ProductScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductScriptsController.php', 'SureCart\Controllers\Admin\Products\ProductsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductsController.php', 'SureCart\Controllers\Admin\Products\ProductsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductsListTable.php', 'SureCart\Controllers\Admin\Settings\AbandonedCheckoutSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AbandonedCheckoutSettings.php', 'SureCart\Controllers\Admin\Settings\AccountSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AccountSettings.php', 'SureCart\Controllers\Admin\Settings\AdvancedSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AdvancedSettings.php', 'SureCart\Controllers\Admin\Settings\BaseSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/BaseSettings.php', 'SureCart\Controllers\Admin\Settings\BrandSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/BrandSettings.php', 'SureCart\Controllers\Admin\Settings\CacheSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/CacheSettings.php', 'SureCart\Controllers\Admin\Settings\ConnectionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ConnectionSettings.php', 'SureCart\Controllers\Admin\Settings\CustomerSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/CustomerSettings.php', 'SureCart\Controllers\Admin\Settings\ExportSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ExportSettings.php', 'SureCart\Controllers\Admin\Settings\OrderSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/OrderSettings.php', 'SureCart\Controllers\Admin\Settings\ProcessorsSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ProcessorsSettings.php', 'SureCart\Controllers\Admin\Settings\ShippingProfileSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ShippingProfileSettings.php', 'SureCart\Controllers\Admin\Settings\ShippingSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ShippingSettings.php', 'SureCart\Controllers\Admin\Settings\SubscriptionPreservationSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/SubscriptionPreservationSettings.php', 'SureCart\Controllers\Admin\Settings\SubscriptionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/SubscriptionSettings.php', 'SureCart\Controllers\Admin\Settings\TaxRegionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/TaxRegionSettings.php', 'SureCart\Controllers\Admin\Settings\TaxSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/TaxSettings.php', 'SureCart\Controllers\Admin\Settings\UpgradeSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/UpgradeSettings.php', 'SureCart\Controllers\Admin\Subscriptions\Scripts\EditScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/Scripts/EditScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\Scripts\ShowScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/Scripts/ShowScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionsListTable.php', 'SureCart\Controllers\Admin\Tables\ListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Tables/ListTable.php', 'SureCart\Controllers\Ajax\NonceController' => __DIR__ . '/../..' . '/app/src/Controllers/Ajax/NonceController.php', 'SureCart\Controllers\Rest\AbandonedCheckoutProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AbandonedCheckoutProtocolController.php', 'SureCart\Controllers\Rest\AbandonedCheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AbandonedCheckoutsController.php', 'SureCart\Controllers\Rest\AccountController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AccountController.php', 'SureCart\Controllers\Rest\ActivationsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ActivationsController.php', 'SureCart\Controllers\Rest\BalanceTransactionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BalanceTransactionsController.php', 'SureCart\Controllers\Rest\BrandController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BrandController.php', 'SureCart\Controllers\Rest\BumpsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BumpsController.php', 'SureCart\Controllers\Rest\CancellationActsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CancellationActsController.php', 'SureCart\Controllers\Rest\CancellationReasonsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CancellationReasonsController.php', 'SureCart\Controllers\Rest\ChargesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ChargesController.php', 'SureCart\Controllers\Rest\CheckEmailController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CheckEmailController.php', 'SureCart\Controllers\Rest\CheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CheckoutsController.php', 'SureCart\Controllers\Rest\CouponsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CouponsController.php', 'SureCart\Controllers\Rest\CustomerController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerController.php', 'SureCart\Controllers\Rest\CustomerLinksController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerLinksController.php', 'SureCart\Controllers\Rest\CustomerNotificationProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerNotificationProtocolController.php', 'SureCart\Controllers\Rest\DownloadsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/DownloadsController.php', 'SureCart\Controllers\Rest\DraftCheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/DraftCheckoutsController.php', 'SureCart\Controllers\Rest\FulfillmentsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/FulfillmentsController.php', 'SureCart\Controllers\Rest\IntegrationProvidersController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/IntegrationProvidersController.php', 'SureCart\Controllers\Rest\IntegrationsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/IntegrationsController.php', 'SureCart\Controllers\Rest\InvoicesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/InvoicesController.php', 'SureCart\Controllers\Rest\LicensesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LicensesController.php', 'SureCart\Controllers\Rest\LineItemsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LineItemsController.php', 'SureCart\Controllers\Rest\LoginController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LoginController.php', 'SureCart\Controllers\Rest\ManualPaymentMethodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ManualPaymentMethodsController.php', 'SureCart\Controllers\Rest\MediasController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/MediasController.php', 'SureCart\Controllers\Rest\OrderController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/OrderController.php', 'SureCart\Controllers\Rest\OrderProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/OrderProtocolController.php', 'SureCart\Controllers\Rest\PaymentIntentsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PaymentIntentsController.php', 'SureCart\Controllers\Rest\PaymentMethodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PaymentMethodsController.php', 'SureCart\Controllers\Rest\PeriodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PeriodsController.php', 'SureCart\Controllers\Rest\PortalProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PortalProtocolController.php', 'SureCart\Controllers\Rest\PricesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PricesController.php', 'SureCart\Controllers\Rest\ProcessorController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProcessorController.php', 'SureCart\Controllers\Rest\ProductGroupsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductGroupsController.php', 'SureCart\Controllers\Rest\ProductMediaController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductMediaController.php', 'SureCart\Controllers\Rest\ProductsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductsController.php', 'SureCart\Controllers\Rest\PromotionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PromotionsController.php', 'SureCart\Controllers\Rest\ProvisionalAccountController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProvisionalAccountController.php', 'SureCart\Controllers\Rest\PurchasesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PurchasesController.php', 'SureCart\Controllers\Rest\RefundsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/RefundsController.php', 'SureCart\Controllers\Rest\RestController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/RestController.php', 'SureCart\Controllers\Rest\SettingsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SettingsController.php', 'SureCart\Controllers\Rest\ShippingMethodController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingMethodController.php', 'SureCart\Controllers\Rest\ShippingProfileController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingProfileController.php', 'SureCart\Controllers\Rest\ShippingProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingProtocolController.php', 'SureCart\Controllers\Rest\ShippingRateController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingRateController.php', 'SureCart\Controllers\Rest\ShippingZoneController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingZoneController.php', 'SureCart\Controllers\Rest\StatisticsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/StatisticsController.php', 'SureCart\Controllers\Rest\SubscriptionProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SubscriptionProtocolController.php', 'SureCart\Controllers\Rest\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SubscriptionsController.php', 'SureCart\Controllers\Rest\TaxProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxProtocolController.php', 'SureCart\Controllers\Rest\TaxRegistrationController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxRegistrationController.php', 'SureCart\Controllers\Rest\TaxZoneController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxZoneController.php', 'SureCart\Controllers\Rest\UploadsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/UploadsController.php', 'SureCart\Controllers\Rest\VerificationCodeController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/VerificationCodeController.php', 'SureCart\Controllers\Rest\WebhookController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/WebhookController.php', 'SureCart\Controllers\Web\BuyPageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/BuyPageController.php', 'SureCart\Controllers\Web\DashboardController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/DashboardController.php', 'SureCart\Controllers\Web\ProductPageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/ProductPageController.php', 'SureCart\Controllers\Web\ProductTypePageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/ProductTypePageController.php', 'SureCart\Controllers\Web\PurchaseController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/PurchaseController.php', 'SureCart\Controllers\Web\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/SubscriptionsController.php', 'SureCart\Controllers\Web\WebhookController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/WebhookController.php', 'SureCart\Database\GeneralMigration' => __DIR__ . '/../..' . '/app/src/Database/GeneralMigration.php', 'SureCart\Database\MigrationsServiceProvider' => __DIR__ . '/../..' . '/app/src/Database/MigrationsServiceProvider.php', 'SureCart\Database\Table' => __DIR__ . '/../..' . '/app/src/Database/Table.php', 'SureCart\Database\Tables\Integrations' => __DIR__ . '/../..' . '/app/src/Database/Tables/Integrations.php', 'SureCart\Database\UpdateMigrationServiceProvider' => __DIR__ . '/../..' . '/app/src/Database/UpdateMigrationServiceProvider.php', 'SureCart\Database\UserMetaMigrationsService' => __DIR__ . '/../..' . '/app/src/Database/UserMetaMigrationsService.php', 'SureCart\Form\FormValidationService' => __DIR__ . '/../..' . '/app/src/Form/FormValidationService.php', 'SureCart\Install\InstallService' => __DIR__ . '/../..' . '/app/src/Install/InstallService.php', 'SureCart\Install\InstallServiceProvider' => __DIR__ . '/../..' . '/app/src/Install/InstallServiceProvider.php', 'SureCart\Integrations\AbstractIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AbstractIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPRecurringIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPRecurringIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPService' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPService.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPServiceProvider.php', 'SureCart\Integrations\Beaver\BeaverFormModule' => __DIR__ . '/../..' . '/app/src/Integrations/Beaver/BeaverFormModule.php', 'SureCart\Integrations\Beaver\BeaverServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/Beaver/BeaverServiceProvider.php', 'SureCart\Integrations\BuddyBoss\BuddyBossService' => __DIR__ . '/../..' . '/app/src/Integrations/BuddyBoss/BuddyBossService.php', 'SureCart\Integrations\BuddyBoss\BuddyBossServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/BuddyBoss/BuddyBossServiceProvider.php', 'SureCart\Integrations\Contracts\IntegrationInterface' => __DIR__ . '/../..' . '/app/src/Integrations/Contracts/IntegrationInterface.php', 'SureCart\Integrations\Contracts\PurchaseSyncInterface' => __DIR__ . '/../..' . '/app/src/Integrations/Contracts/PurchaseSyncInterface.php', 'SureCart\Integrations\DiviServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/DiviServiceProvider.php', 'SureCart\Integrations\Elementor\Conditions\Conditions' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/Conditions.php', 'SureCart\Integrations\Elementor\Conditions\ProductCondition' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/ProductCondition.php', 'SureCart\Integrations\Elementor\Conditions\ProductSingle' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/ProductSingle.php', 'SureCart\Integrations\Elementor\Documents\ProductDocument' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Documents/ProductDocument.php', 'SureCart\Integrations\Elementor\ElementorServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/ElementorServiceProvider.php', 'SureCart\Integrations\Elementor\ReusableFormWidget' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/ReusableFormWidget.php', 'SureCart\Integrations\IntegrationService' => __DIR__ . '/../..' . '/app/src/Integrations/IntegrationService.php', 'SureCart\Integrations\LearnDashGroup\LearnDashGroupService' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDashGroup/LearnDashGroupService.php', 'SureCart\Integrations\LearnDashGroup\LearnDashGroupServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDashGroup/LearnDashGroupServiceProvider.php', 'SureCart\Integrations\LearnDash\LearnDashService' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDash/LearnDashService.php', 'SureCart\Integrations\LearnDash\LearnDashServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDash/LearnDashServiceProvider.php', 'SureCart\Integrations\LifterLMS\LifterLMSService' => __DIR__ . '/../..' . '/app/src/Integrations/LifterLMS/LifterLMSService.php', 'SureCart\Integrations\LifterLMS\LifterLMSServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LifterLMS/LifterLMSServiceProvider.php', 'SureCart\Integrations\MemberPress\MemberPressService' => __DIR__ . '/../..' . '/app/src/Integrations/MemberPress/MemberPressService.php', 'SureCart\Integrations\MemberPress\MemberPressServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/MemberPress/MemberPressServiceProvider.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductIDDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductIDDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductNameField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductNameField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductIDDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductIDDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductNameDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductNameDataField.php', 'SureCart\Integrations\ThriveAutomator\DataObjects\PreviousProductDataObject' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataObjects/PreviousProductDataObject.php', 'SureCart\Integrations\ThriveAutomator\DataObjects\ProductDataObject' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataObjects/ProductDataObject.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorApp' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorApp.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorService' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorService.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorServiceProvider.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseCreatedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseCreatedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseInvokedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseInvokedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseRevokedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseRevokedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseUpdatedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseUpdatedTrigger.php', 'SureCart\Integrations\TutorLMS\TutorLMSService' => __DIR__ . '/../..' . '/app/src/Integrations/TutorLMS/TutorLMSService.php', 'SureCart\Integrations\TutorLMS\TutorLMSServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/TutorLMS/TutorLMSServiceProvider.php', 'SureCart\Integrations\User\UserService' => __DIR__ . '/../..' . '/app/src/Integrations/User/UserService.php', 'SureCart\Integrations\User\UserServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/User/UserServiceProvider.php', 'SureCart\Middleware\AccountClaimMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/AccountClaimMiddleware.php', 'SureCart\Middleware\ArchiveModelMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/ArchiveModelMiddleware.php', 'SureCart\Middleware\BrandColorMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/BrandColorMiddleware.php', 'SureCart\Middleware\CheckoutRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/CheckoutRedirectMiddleware.php', 'SureCart\Middleware\ComponentAssetsMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/ComponentAssetsMiddleware.php', 'SureCart\Middleware\CustomerDashboardRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/CustomerDashboardRedirectMiddleware.php', 'SureCart\Middleware\EditModelMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/EditModelMiddleware.php', 'SureCart\Middleware\LoginLinkMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/LoginLinkMiddleware.php', 'SureCart\Middleware\LoginMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/LoginMiddleware.php', 'SureCart\Middleware\NonceMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/NonceMiddleware.php', 'SureCart\Middleware\OrderRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/OrderRedirectMiddleware.php', 'SureCart\Middleware\PathRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PathRedirectMiddleware.php', 'SureCart\Middleware\PaymentFailureRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PaymentFailureRedirectMiddleware.php', 'SureCart\Middleware\PurchaseRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PurchaseRedirectMiddleware.php', 'SureCart\Middleware\SubscriptionRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/SubscriptionRedirectMiddleware.php', 'SureCart\Middleware\WebhooksMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/WebhooksMiddleware.php', 'SureCart\Models\AbandonedCheckout' => __DIR__ . '/../..' . '/app/src/Models/AbandonedCheckout.php', 'SureCart\Models\AbandonedCheckoutProtocol' => __DIR__ . '/../..' . '/app/src/Models/AbandonedCheckoutProtocol.php', 'SureCart\Models\Account' => __DIR__ . '/../..' . '/app/src/Models/Account.php', 'SureCart\Models\AccountPortalSession' => __DIR__ . '/../..' . '/app/src/Models/AccountPortalSession.php', 'SureCart\Models\Activation' => __DIR__ . '/../..' . '/app/src/Models/Activation.php', 'SureCart\Models\ApiToken' => __DIR__ . '/../..' . '/app/src/Models/ApiToken.php', 'SureCart\Models\BalanceTransaction' => __DIR__ . '/../..' . '/app/src/Models/BalanceTransaction.php', 'SureCart\Models\Brand' => __DIR__ . '/../..' . '/app/src/Models/Brand.php', 'SureCart\Models\Bump' => __DIR__ . '/../..' . '/app/src/Models/Bump.php', 'SureCart\Models\BuyLink' => __DIR__ . '/../..' . '/app/src/Models/BuyLink.php', 'SureCart\Models\CancellationAct' => __DIR__ . '/../..' . '/app/src/Models/CancellationAct.php', 'SureCart\Models\CancellationReason' => __DIR__ . '/../..' . '/app/src/Models/CancellationReason.php', 'SureCart\Models\Charge' => __DIR__ . '/../..' . '/app/src/Models/Charge.php', 'SureCart\Models\Checkout' => __DIR__ . '/../..' . '/app/src/Models/Checkout.php', 'SureCart\Models\Collection' => __DIR__ . '/../..' . '/app/src/Models/Collection.php', 'SureCart\Models\Component' => __DIR__ . '/../..' . '/app/src/Models/Component.php', 'SureCart\Models\Coupon' => __DIR__ . '/../..' . '/app/src/Models/Coupon.php', 'SureCart\Models\Customer' => __DIR__ . '/../..' . '/app/src/Models/Customer.php', 'SureCart\Models\CustomerLink' => __DIR__ . '/../..' . '/app/src/Models/CustomerLink.php', 'SureCart\Models\CustomerNotificationProtocol' => __DIR__ . '/../..' . '/app/src/Models/CustomerNotificationProtocol.php', 'SureCart\Models\DatabaseModel' => __DIR__ . '/../..' . '/app/src/Models/DatabaseModel.php', 'SureCart\Models\Download' => __DIR__ . '/../..' . '/app/src/Models/Download.php', 'SureCart\Models\Event' => __DIR__ . '/../..' . '/app/src/Models/Event.php', 'SureCart\Models\Form' => __DIR__ . '/../..' . '/app/src/Models/Form.php', 'SureCart\Models\Fulfillment' => __DIR__ . '/../..' . '/app/src/Models/Fulfillment.php', 'SureCart\Models\FulfillmentItem' => __DIR__ . '/../..' . '/app/src/Models/FulfillmentItem.php', 'SureCart\Models\Integration' => __DIR__ . '/../..' . '/app/src/Models/Integration.php', 'SureCart\Models\Invoice' => __DIR__ . '/../..' . '/app/src/Models/Invoice.php', 'SureCart\Models\License' => __DIR__ . '/../..' . '/app/src/Models/License.php', 'SureCart\Models\LineItem' => __DIR__ . '/../..' . '/app/src/Models/LineItem.php', 'SureCart\Models\ManualPaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/ManualPaymentMethod.php', 'SureCart\Models\Media' => __DIR__ . '/../..' . '/app/src/Models/Media.php', 'SureCart\Models\Model' => __DIR__ . '/../..' . '/app/src/Models/Model.php', 'SureCart\Models\ModelInterface' => __DIR__ . '/../..' . '/app/src/Models/ModelInterface.php', 'SureCart\Models\Order' => __DIR__ . '/../..' . '/app/src/Models/Order.php', 'SureCart\Models\OrderProtocol' => __DIR__ . '/../..' . '/app/src/Models/OrderProtocol.php', 'SureCart\Models\PaymentIntent' => __DIR__ . '/../..' . '/app/src/Models/PaymentIntent.php', 'SureCart\Models\PaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/PaymentMethod.php', 'SureCart\Models\Period' => __DIR__ . '/../..' . '/app/src/Models/Period.php', 'SureCart\Models\PortalProtocol' => __DIR__ . '/../..' . '/app/src/Models/PortalProtocol.php', 'SureCart\Models\PortalSession' => __DIR__ . '/../..' . '/app/src/Models/PortalSession.php', 'SureCart\Models\Price' => __DIR__ . '/../..' . '/app/src/Models/Price.php', 'SureCart\Models\Processor' => __DIR__ . '/../..' . '/app/src/Models/Processor.php', 'SureCart\Models\Product' => __DIR__ . '/../..' . '/app/src/Models/Product.php', 'SureCart\Models\ProductGroup' => __DIR__ . '/../..' . '/app/src/Models/ProductGroup.php', 'SureCart\Models\ProductMedia' => __DIR__ . '/../..' . '/app/src/Models/ProductMedia.php', 'SureCart\Models\Promotion' => __DIR__ . '/../..' . '/app/src/Models/Promotion.php', 'SureCart\Models\ProvisionalAccount' => __DIR__ . '/../..' . '/app/src/Models/ProvisionalAccount.php', 'SureCart\Models\Purchase' => __DIR__ . '/../..' . '/app/src/Models/Purchase.php', 'SureCart\Models\Refund' => __DIR__ . '/../..' . '/app/src/Models/Refund.php', 'SureCart\Models\ShippingMethod' => __DIR__ . '/../..' . '/app/src/Models/ShippingMethod.php', 'SureCart\Models\ShippingProfile' => __DIR__ . '/../..' . '/app/src/Models/ShippingProfile.php', 'SureCart\Models\ShippingProtocol' => __DIR__ . '/../..' . '/app/src/Models/ShippingProtocol.php', 'SureCart\Models\ShippingRate' => __DIR__ . '/../..' . '/app/src/Models/ShippingRate.php', 'SureCart\Models\ShippingZone' => __DIR__ . '/../..' . '/app/src/Models/ShippingZone.php', 'SureCart\Models\Statistic' => __DIR__ . '/../..' . '/app/src/Models/Statistic.php', 'SureCart\Models\Subscription' => __DIR__ . '/../..' . '/app/src/Models/Subscription.php', 'SureCart\Models\SubscriptionProtocol' => __DIR__ . '/../..' . '/app/src/Models/SubscriptionProtocol.php', 'SureCart\Models\TaxProtocol' => __DIR__ . '/../..' . '/app/src/Models/TaxProtocol.php', 'SureCart\Models\TaxRegistration' => __DIR__ . '/../..' . '/app/src/Models/TaxRegistration.php', 'SureCart\Models\TaxZone' => __DIR__ . '/../..' . '/app/src/Models/TaxZone.php', 'SureCart\Models\Traits\CanFinalize' => __DIR__ . '/../..' . '/app/src/Models/Traits/CanFinalize.php', 'SureCart\Models\Traits\HasCharge' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCharge.php', 'SureCart\Models\Traits\HasCheckout' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCheckout.php', 'SureCart\Models\Traits\HasCoupon' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCoupon.php', 'SureCart\Models\Traits\HasCustomer' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCustomer.php', 'SureCart\Models\Traits\HasDiscount' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasDiscount.php', 'SureCart\Models\Traits\HasImageSizes' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasImageSizes.php', 'SureCart\Models\Traits\HasOrder' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasOrder.php', 'SureCart\Models\Traits\HasPaymentIntent' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPaymentIntent.php', 'SureCart\Models\Traits\HasPaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPaymentMethod.php', 'SureCart\Models\Traits\HasPrice' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPrice.php', 'SureCart\Models\Traits\HasProcessorType' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasProcessorType.php', 'SureCart\Models\Traits\HasProduct' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasProduct.php', 'SureCart\Models\Traits\HasPurchase' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPurchase.php', 'SureCart\Models\Traits\HasPurchases' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPurchases.php', 'SureCart\Models\Traits\HasRefund' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasRefund.php', 'SureCart\Models\Traits\HasShippingAddress' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasShippingAddress.php', 'SureCart\Models\Traits\HasSubscription' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasSubscription.php', 'SureCart\Models\Traits\HasSubscriptions' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasSubscriptions.php', 'SureCart\Models\Traits\SyncsCustomer' => __DIR__ . '/../..' . '/app/src/Models/Traits/SyncsCustomer.php', 'SureCart\Models\Upload' => __DIR__ . '/../..' . '/app/src/Models/Upload.php', 'SureCart\Models\User' => __DIR__ . '/../..' . '/app/src/Models/User.php', 'SureCart\Models\VerificationCode' => __DIR__ . '/../..' . '/app/src/Models/VerificationCode.php', 'SureCart\Models\Webhook' => __DIR__ . '/../..' . '/app/src/Models/Webhook.php', 'SureCart\Permissions\AdminAccessService' => __DIR__ . '/../..' . '/app/src/Permissions/AdminAccessService.php', 'SureCart\Permissions\Models\BalanceTransactionPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/BalanceTransactionPermissionsController.php', 'SureCart\Permissions\Models\ChargePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/ChargePermissionsController.php', 'SureCart\Permissions\Models\CheckoutPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/CheckoutPermissionsController.php', 'SureCart\Permissions\Models\CustomerPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/CustomerPermissionsController.php', 'SureCart\Permissions\Models\InvoicePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/InvoicePermissionsController.php', 'SureCart\Permissions\Models\LicensePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/LicensePermissionsController.php', 'SureCart\Permissions\Models\MediaPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/MediaPermissionsController.php', 'SureCart\Permissions\Models\ModelPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/ModelPermissionsController.php', 'SureCart\Permissions\Models\OrderPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/OrderPermissionsController.php', 'SureCart\Permissions\Models\PaymentMethodPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/PaymentMethodPermissionsController.php', 'SureCart\Permissions\Models\PurchasePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/PurchasePermissionsController.php', 'SureCart\Permissions\Models\RefundPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/RefundPermissionsController.php', 'SureCart\Permissions\Models\SubscriptionPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/SubscriptionPermissionsController.php', 'SureCart\Permissions\PermissionsService' => __DIR__ . '/../..' . '/app/src/Permissions/PermissionsService.php', 'SureCart\Permissions\RolesService' => __DIR__ . '/../..' . '/app/src/Permissions/RolesService.php', 'SureCart\Permissions\RolesServiceProvider' => __DIR__ . '/../..' . '/app/src/Permissions/RolesServiceProvider.php', 'SureCart\Permissions\WPConfig\WPConfigTransformService' => __DIR__ . '/../..' . '/app/src/Permissions/WPConfig/WPConfigTransformService.php', 'SureCart\Request\RequestCacheService' => __DIR__ . '/../..' . '/app/src/Request/RequestCacheService.php', 'SureCart\Request\RequestService' => __DIR__ . '/../..' . '/app/src/Request/RequestService.php', 'SureCart\Request\RequestServiceProvider' => __DIR__ . '/../..' . '/app/src/Request/RequestServiceProvider.php', 'SureCart\Rest\AbandonedCheckoutProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AbandonedCheckoutProtocolRestServiceProvider.php', 'SureCart\Rest\AbandonedCheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AbandonedCheckoutRestServiceProvider.php', 'SureCart\Rest\AccountRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AccountRestServiceProvider.php', 'SureCart\Rest\ActivationRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ActivationRestServiceProvider.php', 'SureCart\Rest\BalanceTransactionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BalanceTransactionRestServiceProvider.php', 'SureCart\Rest\BlockPatternsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BlockPatternsRestServiceProvider.php', 'SureCart\Rest\BrandRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BrandRestServiceProvider.php', 'SureCart\Rest\BumpRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BumpRestServiceProvider.php', 'SureCart\Rest\CancellationActRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CancellationActRestServiceProvider.php', 'SureCart\Rest\CancellationReasonRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CancellationReasonRestServiceProvider.php', 'SureCart\Rest\ChargesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ChargesRestServiceProvider.php', 'SureCart\Rest\CheckEmailRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CheckEmailRestServiceProvider.php', 'SureCart\Rest\CheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CheckoutRestServiceProvider.php', 'SureCart\Rest\CouponRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CouponRestServiceProvider.php', 'SureCart\Rest\CustomerLinksRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerLinksRestServiceProvider.php', 'SureCart\Rest\CustomerNotificationProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerNotificationProtocolRestServiceProvider.php', 'SureCart\Rest\CustomerRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerRestServiceProvider.php', 'SureCart\Rest\DownloadRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/DownloadRestServiceProvider.php', 'SureCart\Rest\DraftCheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/DraftCheckoutRestServiceProvider.php', 'SureCart\Rest\FulfillmentRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/FulfillmentRestServiceProvider.php', 'SureCart\Rest\IntegrationProvidersRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/IntegrationProvidersRestServiceProvider.php', 'SureCart\Rest\IntegrationsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/IntegrationsRestServiceProvider.php', 'SureCart\Rest\InvoicesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/InvoicesRestServiceProvider.php', 'SureCart\Rest\LicenseRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LicenseRestServiceProvider.php', 'SureCart\Rest\LineItemsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LineItemsRestServiceProvider.php', 'SureCart\Rest\LoginRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LoginRestServiceProvider.php', 'SureCart\Rest\ManualPaymentMethodsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ManualPaymentMethodsRestServiceProvider.php', 'SureCart\Rest\MediaRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/MediaRestServiceProvider.php', 'SureCart\Rest\OrderProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/OrderProtocolRestServiceProvider.php', 'SureCart\Rest\OrderRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/OrderRestServiceProvider.php', 'SureCart\Rest\PaymentIntentsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PaymentIntentsRestServiceProvider.php', 'SureCart\Rest\PaymentMethodsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PaymentMethodsRestServiceProvider.php', 'SureCart\Rest\PeriodRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PeriodRestServiceProvider.php', 'SureCart\Rest\PortalProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PortalProtocolRestServiceProvider.php', 'SureCart\Rest\PriceRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PriceRestServiceProvider.php', 'SureCart\Rest\ProcessorRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProcessorRestServiceProvider.php', 'SureCart\Rest\ProductGroupsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductGroupsRestServiceProvider.php', 'SureCart\Rest\ProductMediaRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductMediaRestServiceProvider.php', 'SureCart\Rest\ProductsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductsRestServiceProvider.php', 'SureCart\Rest\PromotionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PromotionRestServiceProvider.php', 'SureCart\Rest\ProvisionalAccountRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProvisionalAccountRestServiceProvider.php', 'SureCart\Rest\PurchasesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PurchasesRestServiceProvider.php', 'SureCart\Rest\RefundsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/RefundsRestServiceProvider.php', 'SureCart\Rest\RestServiceInterface' => __DIR__ . '/../..' . '/app/src/Rest/RestServiceInterface.php', 'SureCart\Rest\RestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/RestServiceProvider.php', 'SureCart\Rest\SettingsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SettingsRestServiceProvider.php', 'SureCart\Rest\ShippingMethodRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingMethodRestServiceProvider.php', 'SureCart\Rest\ShippingProfileRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingProfileRestServiceProvider.php', 'SureCart\Rest\ShippingProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingProtocolRestServiceProvider.php', 'SureCart\Rest\ShippingRateRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingRateRestServiceProvider.php', 'SureCart\Rest\ShippingZoneRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingZoneRestServiceProvider.php', 'SureCart\Rest\StatisticRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/StatisticRestServiceProvider.php', 'SureCart\Rest\SubscriptionProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SubscriptionProtocolRestServiceProvider.php', 'SureCart\Rest\SubscriptionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SubscriptionRestServiceProvider.php', 'SureCart\Rest\TaxProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxProtocolRestServiceProvider.php', 'SureCart\Rest\TaxRegistrationRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxRegistrationRestServiceProvider.php', 'SureCart\Rest\TaxZoneRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxZoneRestServiceProvider.php', 'SureCart\Rest\UploadsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/UploadsRestServiceProvider.php', 'SureCart\Rest\VerificationCodeRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/VerificationCodeRestServiceProvider.php', 'SureCart\Rest\WebhooksRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/WebhooksRestServiceProvider.php', 'SureCart\Routing\AdminRouteService' => __DIR__ . '/../..' . '/app/src/Routing/AdminRouteService.php', 'SureCart\Routing\AdminRouteServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/AdminRouteServiceProvider.php', 'SureCart\Routing\AdminURLService' => __DIR__ . '/../..' . '/app/src/Routing/AdminURLService.php', 'SureCart\Routing\PermalinkService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkService.php', 'SureCart\Routing\PermalinkServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkServiceProvider.php', 'SureCart\Routing\PermalinkSettingService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkSettingService.php', 'SureCart\Routing\PermalinksSettingsService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinksSettingsService.php', 'SureCart\Routing\RouteConditionsServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/RouteConditionsServiceProvider.php', 'SureCart\Settings\RegisterSettingService' => __DIR__ . '/../..' . '/app/src/Settings/RegisterSettingService.php', 'SureCart\Settings\SettingService' => __DIR__ . '/../..' . '/app/src/Settings/SettingService.php', 'SureCart\Settings\SettingsServiceProvider' => __DIR__ . '/../..' . '/app/src/Settings/SettingsServiceProvider.php', 'SureCart\Support\Arrays' => __DIR__ . '/../..' . '/app/src/Support/Arrays.php', 'SureCart\Support\Blocks\TemplateUtilityService' => __DIR__ . '/../..' . '/app/src/Support/Blocks/TemplateUtilityService.php', 'SureCart\Support\ColorService' => __DIR__ . '/../..' . '/app/src/Support/ColorService.php', 'SureCart\Support\Currency' => __DIR__ . '/../..' . '/app/src/Support/Currency.php', 'SureCart\Support\Encryption' => __DIR__ . '/../..' . '/app/src/Support/Encryption.php', 'SureCart\Support\Errors\ErrorsService' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsService.php', 'SureCart\Support\Errors\ErrorsServiceProvider' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsServiceProvider.php', 'SureCart\Support\Errors\ErrorsTranslationService' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsTranslationService.php', 'SureCart\Support\Scripts\AdminModelEditController' => __DIR__ . '/../..' . '/app/src/Support/Scripts/AdminModelEditController.php', 'SureCart\Support\Server' => __DIR__ . '/../..' . '/app/src/Support/Server.php', 'SureCart\Support\TimeDate' => __DIR__ . '/../..' . '/app/src/Support/TimeDate.php', 'SureCart\Support\UtilityService' => __DIR__ . '/../..' . '/app/src/Support/UtilityService.php', 'SureCart\Support\UtilityServiceProvider' => __DIR__ . '/../..' . '/app/src/Support/UtilityServiceProvider.php', 'SureCart\View\ViewServiceProvider' => __DIR__ . '/../..' . '/app/src/View/ViewServiceProvider.php', 'SureCart\Webhooks\WebhooksHistoryService' => __DIR__ . '/../..' . '/app/src/Webhooks/WebhooksHistoryService.php', 'SureCart\Webhooks\WebhooksService' => __DIR__ . '/../..' . '/app/src/Webhooks/WebhooksService.php', 'SureCart\Webhooks\WebhooksServiceProvider' => __DIR__ . '/../..' . '/app/src/Webhooks/WebhooksServiceProvider.php', 'SureCart\WordPress\ActionsService' => __DIR__ . '/../..' . '/app/src/WordPress/ActionsService.php', 'SureCart\WordPress\Admin\Menus\AdminMenuPageService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Menus/AdminMenuPageService.php', 'SureCart\WordPress\Admin\Menus\AdminMenuPageServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Menus/AdminMenuPageServiceProvider.php', 'SureCart\WordPress\Admin\Notices\AdminNoticesService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Notices/AdminNoticesService.php', 'SureCart\WordPress\Admin\Notices\AdminNoticesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Notices/AdminNoticesServiceProvider.php', 'SureCart\WordPress\Admin\Profile\UserProfileService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Profile/UserProfileService.php', 'SureCart\WordPress\Admin\Profile\UserProfileServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Profile/UserProfileServiceProvider.php', 'SureCart\WordPress\Admin\SSLCheck\AdminSSLCheckService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/SSLCheck/AdminSSLCheckService.php', 'SureCart\WordPress\Assets\AssetsService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/AssetsService.php', 'SureCart\WordPress\Assets\AssetsServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/AssetsServiceProvider.php', 'SureCart\WordPress\Assets\BlockAssetsLoadService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/BlockAssetsLoadService.php', 'SureCart\WordPress\Assets\PreloadService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/PreloadService.php', 'SureCart\WordPress\Assets\ScriptsService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/ScriptsService.php', 'SureCart\WordPress\Assets\StylesService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/StylesService.php', 'SureCart\WordPress\CompatibilityService' => __DIR__ . '/../..' . '/app/src/WordPress/CompatibilityService.php', 'SureCart\WordPress\Pages\PageSeeder' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageSeeder.php', 'SureCart\WordPress\Pages\PageService' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageService.php', 'SureCart\WordPress\Pages\PageServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageServiceProvider.php', 'SureCart\WordPress\PluginService' => __DIR__ . '/../..' . '/app/src/WordPress/PluginService.php', 'SureCart\WordPress\PluginServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/PluginServiceProvider.php', 'SureCart\WordPress\PostTypes\CartPostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/CartPostTypeService.php', 'SureCart\WordPress\PostTypes\FormPostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/FormPostTypeService.php', 'SureCart\WordPress\PostTypes\FormPostTypeServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/FormPostTypeServiceProvider.php', 'SureCart\WordPress\PostTypes\ProductPagePostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/ProductPagePostTypeService.php', 'SureCart\WordPress\RecaptchaValidationService' => __DIR__ . '/../..' . '/app/src/WordPress/RecaptchaValidationService.php', 'SureCart\WordPress\Shortcodes\ShortcodesBlockConversionService' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesBlockConversionService.php', 'SureCart\WordPress\Shortcodes\ShortcodesService' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesService.php', 'SureCart\WordPress\Shortcodes\ShortcodesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesServiceProvider.php', 'SureCart\WordPress\Sitemap\ProductSiteMap' => __DIR__ . '/../..' . '/app/src/WordPress/Sitemap/ProductSiteMap.php', 'SureCart\WordPress\Sitemap\SitemapsService' => __DIR__ . '/../..' . '/app/src/WordPress/Sitemap/SitemapsService.php', 'SureCart\WordPress\Templates\BlockTemplatesService' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/BlockTemplatesService.php', 'SureCart\WordPress\Templates\TemplatesService' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/TemplatesService.php', 'SureCart\WordPress\Templates\TemplatesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/TemplatesServiceProvider.php', 'SureCart\WordPress\ThemeService' => __DIR__ . '/../..' . '/app/src/WordPress/ThemeService.php', 'SureCart\WordPress\ThemeServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/ThemeServiceProvider.php', 'SureCart\WordPress\TranslationsServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/TranslationsServiceProvider.php', 'SureCart\WordPress\Users\CustomerLinkService' => __DIR__ . '/../..' . '/app/src/WordPress/Users/CustomerLinkService.php', 'SureCart\WordPress\Users\UsersService' => __DIR__ . '/../..' . '/app/src/WordPress/Users/UsersService.php', 'SureCart\WordPress\Users\UsersServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Users/UsersServiceProvider.php', 'TypistTech\Imposter\ArrayUtil' => __DIR__ . '/..' . '/typisttech/imposter/src/ArrayUtil.php', 'TypistTech\Imposter\Config' => __DIR__ . '/..' . '/typisttech/imposter/src/Config.php', 'TypistTech\Imposter\ConfigCollection' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollection.php', 'TypistTech\Imposter\ConfigCollectionFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollectionFactory.php', 'TypistTech\Imposter\ConfigCollectionInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollectionInterface.php', 'TypistTech\Imposter\ConfigFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigFactory.php', 'TypistTech\Imposter\ConfigInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigInterface.php', 'TypistTech\Imposter\Filesystem' => __DIR__ . '/..' . '/typisttech/imposter/src/Filesystem.php', 'TypistTech\Imposter\FilesystemInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/FilesystemInterface.php', 'TypistTech\Imposter\Imposter' => __DIR__ . '/..' . '/typisttech/imposter/src/Imposter.php', 'TypistTech\Imposter\ImposterFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ImposterFactory.php', 'TypistTech\Imposter\ImposterInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ImposterInterface.php', 'TypistTech\Imposter\Plugin\AutoloadMerger' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/AutoloadMerger.php', 'TypistTech\Imposter\Plugin\ImposterPlugin' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/ImposterPlugin.php', 'TypistTech\Imposter\Plugin\Transformer' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/Transformer.php', 'TypistTech\Imposter\ProjectConfig' => __DIR__ . '/..' . '/typisttech/imposter/src/ProjectConfig.php', 'TypistTech\Imposter\ProjectConfigInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ProjectConfigInterface.php', 'TypistTech\Imposter\StringUtil' => __DIR__ . '/..' . '/typisttech/imposter/src/StringUtil.php', 'TypistTech\Imposter\Transformer' => __DIR__ . '/..' . '/typisttech/imposter/src/Transformer.php', 'TypistTech\Imposter\TransformerInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/TransformerInterface.php');
+        public static $classMap = array('Composer\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php', 'Composer\Installers\AglInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AglInstaller.php', 'Composer\Installers\AimeosInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AimeosInstaller.php', 'Composer\Installers\AnnotateCmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AnnotateCmsInstaller.php', 'Composer\Installers\AsgardInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AsgardInstaller.php', 'Composer\Installers\AttogramInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AttogramInstaller.php', 'Composer\Installers\BaseInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BaseInstaller.php', 'Composer\Installers\BitrixInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BitrixInstaller.php', 'Composer\Installers\BonefishInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/BonefishInstaller.php', 'Composer\Installers\CakePHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CakePHPInstaller.php', 'Composer\Installers\ChefInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ChefInstaller.php', 'Composer\Installers\CiviCrmInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CiviCrmInstaller.php', 'Composer\Installers\ClanCatsFrameworkInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ClanCatsFrameworkInstaller.php', 'Composer\Installers\CockpitInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CockpitInstaller.php', 'Composer\Installers\CodeIgniterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CodeIgniterInstaller.php', 'Composer\Installers\Concrete5Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Concrete5Installer.php', 'Composer\Installers\CraftInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CraftInstaller.php', 'Composer\Installers\CroogoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/CroogoInstaller.php', 'Composer\Installers\DecibelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DecibelInstaller.php', 'Composer\Installers\DframeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DframeInstaller.php', 'Composer\Installers\DokuWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DokuWikiInstaller.php', 'Composer\Installers\DolibarrInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DolibarrInstaller.php', 'Composer\Installers\DrupalInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/DrupalInstaller.php', 'Composer\Installers\ElggInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ElggInstaller.php', 'Composer\Installers\EliasisInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/EliasisInstaller.php', 'Composer\Installers\ExpressionEngineInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ExpressionEngineInstaller.php', 'Composer\Installers\EzPlatformInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/EzPlatformInstaller.php', 'Composer\Installers\FuelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/FuelInstaller.php', 'Composer\Installers\FuelphpInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/FuelphpInstaller.php', 'Composer\Installers\GravInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/GravInstaller.php', 'Composer\Installers\HuradInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/HuradInstaller.php', 'Composer\Installers\ImageCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ImageCMSInstaller.php', 'Composer\Installers\Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Installer.php', 'Composer\Installers\ItopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ItopInstaller.php', 'Composer\Installers\JoomlaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/JoomlaInstaller.php', 'Composer\Installers\KanboardInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KanboardInstaller.php', 'Composer\Installers\KirbyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KirbyInstaller.php', 'Composer\Installers\KnownInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KnownInstaller.php', 'Composer\Installers\KodiCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KodiCMSInstaller.php', 'Composer\Installers\KohanaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/KohanaInstaller.php', 'Composer\Installers\LanManagementSystemInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LanManagementSystemInstaller.php', 'Composer\Installers\LaravelInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LaravelInstaller.php', 'Composer\Installers\LavaLiteInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LavaLiteInstaller.php', 'Composer\Installers\LithiumInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/LithiumInstaller.php', 'Composer\Installers\MODULEWorkInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MODULEWorkInstaller.php', 'Composer\Installers\MODXEvoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MODXEvoInstaller.php', 'Composer\Installers\MagentoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MagentoInstaller.php', 'Composer\Installers\MajimaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MajimaInstaller.php', 'Composer\Installers\MakoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MakoInstaller.php', 'Composer\Installers\MantisBTInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MantisBTInstaller.php', 'Composer\Installers\MauticInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MauticInstaller.php', 'Composer\Installers\MayaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MayaInstaller.php', 'Composer\Installers\MediaWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MediaWikiInstaller.php', 'Composer\Installers\MiaoxingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MiaoxingInstaller.php', 'Composer\Installers\MicroweberInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MicroweberInstaller.php', 'Composer\Installers\ModxInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ModxInstaller.php', 'Composer\Installers\MoodleInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MoodleInstaller.php', 'Composer\Installers\OctoberInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OctoberInstaller.php', 'Composer\Installers\OntoWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OntoWikiInstaller.php', 'Composer\Installers\OsclassInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OsclassInstaller.php', 'Composer\Installers\OxidInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OxidInstaller.php', 'Composer\Installers\PPIInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PPIInstaller.php', 'Composer\Installers\PantheonInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PantheonInstaller.php', 'Composer\Installers\PhiftyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhiftyInstaller.php', 'Composer\Installers\PhpBBInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhpBBInstaller.php', 'Composer\Installers\PimcoreInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PimcoreInstaller.php', 'Composer\Installers\PiwikInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PiwikInstaller.php', 'Composer\Installers\PlentymarketsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PlentymarketsInstaller.php', 'Composer\Installers\Plugin' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Plugin.php', 'Composer\Installers\PortoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PortoInstaller.php', 'Composer\Installers\PrestashopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PrestashopInstaller.php', 'Composer\Installers\ProcessWireInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ProcessWireInstaller.php', 'Composer\Installers\PuppetInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PuppetInstaller.php', 'Composer\Installers\PxcmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PxcmsInstaller.php', 'Composer\Installers\RadPHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RadPHPInstaller.php', 'Composer\Installers\ReIndexInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ReIndexInstaller.php', 'Composer\Installers\Redaxo5Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Redaxo5Installer.php', 'Composer\Installers\RedaxoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RedaxoInstaller.php', 'Composer\Installers\RoundcubeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RoundcubeInstaller.php', 'Composer\Installers\SMFInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SMFInstaller.php', 'Composer\Installers\ShopwareInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ShopwareInstaller.php', 'Composer\Installers\SilverStripeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SilverStripeInstaller.php', 'Composer\Installers\SiteDirectInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SiteDirectInstaller.php', 'Composer\Installers\StarbugInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/StarbugInstaller.php', 'Composer\Installers\SyDESInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyDESInstaller.php', 'Composer\Installers\SyliusInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyliusInstaller.php', 'Composer\Installers\Symfony1Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Symfony1Installer.php', 'Composer\Installers\TYPO3CmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3CmsInstaller.php', 'Composer\Installers\TYPO3FlowInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3FlowInstaller.php', 'Composer\Installers\TaoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TaoInstaller.php', 'Composer\Installers\TastyIgniterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TastyIgniterInstaller.php', 'Composer\Installers\TheliaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TheliaInstaller.php', 'Composer\Installers\TuskInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TuskInstaller.php', 'Composer\Installers\UserFrostingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/UserFrostingInstaller.php', 'Composer\Installers\VanillaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VanillaInstaller.php', 'Composer\Installers\VgmcpInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VgmcpInstaller.php', 'Composer\Installers\WHMCSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WHMCSInstaller.php', 'Composer\Installers\WinterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WinterInstaller.php', 'Composer\Installers\WolfCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WolfCMSInstaller.php', 'Composer\Installers\WordPressInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WordPressInstaller.php', 'Composer\Installers\YawikInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/YawikInstaller.php', 'Composer\Installers\ZendInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZendInstaller.php', 'Composer\Installers\ZikulaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZikulaInstaller.php', 'SureCartAppCore\AppCore\AppCore' => __DIR__ . '/../..' . '/core/app-core/src/AppCore/AppCore.php', 'SureCartAppCore\AppCore\AppCoreServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/AppCore/AppCoreServiceProvider.php', 'SureCartAppCore\Application\ApplicationMixin' => __DIR__ . '/../..' . '/core/app-core/src/Application/ApplicationMixin.php', 'SureCartAppCore\Assets\Assets' => __DIR__ . '/../..' . '/core/app-core/src/Assets/Assets.php', 'SureCartAppCore\Assets\AssetsServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Assets/AssetsServiceProvider.php', 'SureCartAppCore\Assets\Manifest' => __DIR__ . '/../..' . '/core/app-core/src/Assets/Manifest.php', 'SureCartAppCore\Avatar\Avatar' => __DIR__ . '/../..' . '/core/app-core/src/Avatar/Avatar.php', 'SureCartAppCore\Avatar\AvatarServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Avatar/AvatarServiceProvider.php', 'SureCartAppCore\Concerns\JsonFileInvalidException' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/JsonFileInvalidException.php', 'SureCartAppCore\Concerns\JsonFileNotFoundException' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/JsonFileNotFoundException.php', 'SureCartAppCore\Concerns\ReadsJsonTrait' => __DIR__ . '/../..' . '/core/app-core/src/Concerns/ReadsJsonTrait.php', 'SureCartAppCore\Config\Config' => __DIR__ . '/../..' . '/core/app-core/src/Config/Config.php', 'SureCartAppCore\Config\ConfigServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Config/ConfigServiceProvider.php', 'SureCartAppCore\Image\Image' => __DIR__ . '/../..' . '/core/app-core/src/Image/Image.php', 'SureCartAppCore\Image\ImageServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Image/ImageServiceProvider.php', 'SureCartAppCore\Sidebar\Sidebar' => __DIR__ . '/../..' . '/core/app-core/src/Sidebar/Sidebar.php', 'SureCartAppCore\Sidebar\SidebarServiceProvider' => __DIR__ . '/../..' . '/core/app-core/src/Sidebar/SidebarServiceProvider.php', 'SureCartBlocks\Blocks\AddToCartButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/AddToCartButton/Block.php', 'SureCartBlocks\Blocks\Address\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Address/Block.php', 'SureCartBlocks\Blocks\BaseBlock' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BaseBlock.php', 'SureCartBlocks\Blocks\BlockService' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BlockService.php', 'SureCartBlocks\Blocks\BlockServiceProvider' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BlockServiceProvider.php', 'SureCartBlocks\Blocks\BuyButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/BuyButton/Block.php', 'SureCartBlocks\Blocks\CartBlock' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartBlock.php', 'SureCartBlocks\Blocks\CartBumpLineItem\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartBumpLineItem/Block.php', 'SureCartBlocks\Blocks\CartCoupon\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartCoupon/Block.php', 'SureCartBlocks\Blocks\CartMenuButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartMenuButton/Block.php', 'SureCartBlocks\Blocks\CartSubmit\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartSubmit/Block.php', 'SureCartBlocks\Blocks\CartSubtotal\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CartSubtotal/Block.php', 'SureCartBlocks\Blocks\Cart\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Cart/Block.php', 'SureCartBlocks\Blocks\CheckoutForm\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CheckoutForm/Block.php', 'SureCartBlocks\Blocks\CollapsibleRow\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CollapsibleRow/Block.php', 'SureCartBlocks\Blocks\Column\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Column/Block.php', 'SureCartBlocks\Blocks\Columns\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Columns/Block.php', 'SureCartBlocks\Blocks\ConditionalForm\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/ConditionalForm/Block.php', 'SureCartBlocks\Blocks\Confirmation\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Confirmation/Block.php', 'SureCartBlocks\Blocks\Coupon\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Coupon/Block.php', 'SureCartBlocks\Blocks\CustomerDashboardButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/CustomerDashboardButton/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerBillingDetails\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerBillingDetails/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDashboardArea\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDashboardArea/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDashboard\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDashboard/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerDownloads\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerDownloads/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerOrders\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerOrders/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerPaymentMethods\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerPaymentMethods/Block.php', 'SureCartBlocks\Blocks\Dashboard\CustomerSubscriptions\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/CustomerSubscriptions/Block.php', 'SureCartBlocks\Blocks\Dashboard\DashboardPage' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardPage.php', 'SureCartBlocks\Blocks\Dashboard\DashboardPage\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardPage/Block.php', 'SureCartBlocks\Blocks\Dashboard\DashboardTab\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/DashboardTab/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerCharges\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerCharges/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerInvoices\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerInvoices/Block.php', 'SureCartBlocks\Blocks\Dashboard\Deprecated\CustomerShippingAddress\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/Deprecated/CustomerShippingAddress/Block.php', 'SureCartBlocks\Blocks\Dashboard\OrderDownloads\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/OrderDownloads/Block.php', 'SureCartBlocks\Blocks\Dashboard\WordPressAccount\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Dashboard/WordPressAccount/Block.php', 'SureCartBlocks\Blocks\Divider\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Divider/Block.php', 'SureCartBlocks\Blocks\Email\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Email/Block.php', 'SureCartBlocks\Blocks\Form\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Form/Block.php', 'SureCartBlocks\Blocks\LogoutButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/LogoutButton/Block.php', 'SureCartBlocks\Blocks\OrderConfirmationLineItems\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/OrderConfirmationLineItems/Block.php', 'SureCartBlocks\Blocks\Password\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Password/Block.php', 'SureCartBlocks\Blocks\Payment\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Payment/Block.php', 'SureCartBlocks\Blocks\ProductItemList\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/ProductItemList/Block.php', 'SureCartBlocks\Blocks\Product\BuyButton\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/BuyButton/Block.php', 'SureCartBlocks\Blocks\Product\BuyButtons\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/BuyButtons/Block.php', 'SureCartBlocks\Blocks\Product\Description\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Description/Block.php', 'SureCartBlocks\Blocks\Product\Media\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Media/Block.php', 'SureCartBlocks\Blocks\Product\PriceChoices\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/PriceChoices/Block.php', 'SureCartBlocks\Blocks\Product\Price\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Price/Block.php', 'SureCartBlocks\Blocks\Product\Quantity\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Quantity/Block.php', 'SureCartBlocks\Blocks\Product\Title\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/Product/Title/Block.php', 'SureCartBlocks\Blocks\StoreLogo\Block' => __DIR__ . '/../..' . '/packages/blocks/Blocks/StoreLogo/Block.php', 'SureCartBlocks\Controllers\BaseController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/BaseController.php', 'SureCartBlocks\Controllers\ChargeController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/ChargeController.php', 'SureCartBlocks\Controllers\CustomerController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/CustomerController.php', 'SureCartBlocks\Controllers\DownloadController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/DownloadController.php', 'SureCartBlocks\Controllers\InvoiceController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/InvoiceController.php', 'SureCartBlocks\Controllers\OrderController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/OrderController.php', 'SureCartBlocks\Controllers\PaymentMethodController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/PaymentMethodController.php', 'SureCartBlocks\Controllers\SubscriptionController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/SubscriptionController.php', 'SureCartBlocks\Controllers\UserController' => __DIR__ . '/../..' . '/packages/blocks/Controllers/UserController.php', 'SureCartBlocks\Util\BlockStyleAttributes' => __DIR__ . '/../..' . '/packages/blocks/Util/BlockStyleAttributes.php', 'SureCartCore\Application\Application' => __DIR__ . '/../..' . '/core/core/src/Application/Application.php', 'SureCartCore\Application\ApplicationMixin' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationMixin.php', 'SureCartCore\Application\ApplicationServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationServiceProvider.php', 'SureCartCore\Application\ApplicationTrait' => __DIR__ . '/../..' . '/core/core/src/Application/ApplicationTrait.php', 'SureCartCore\Application\ClosureFactory' => __DIR__ . '/../..' . '/core/core/src/Application/ClosureFactory.php', 'SureCartCore\Application\GenericFactory' => __DIR__ . '/../..' . '/core/core/src/Application/GenericFactory.php', 'SureCartCore\Application\HasAliasesTrait' => __DIR__ . '/../..' . '/core/core/src/Application/HasAliasesTrait.php', 'SureCartCore\Application\HasContainerTrait' => __DIR__ . '/../..' . '/core/core/src/Application/HasContainerTrait.php', 'SureCartCore\Application\LoadsServiceProvidersTrait' => __DIR__ . '/../..' . '/core/core/src/Application/LoadsServiceProvidersTrait.php', 'SureCartCore\Controllers\ControllersServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Controllers/ControllersServiceProvider.php', 'SureCartCore\Controllers\WordPressController' => __DIR__ . '/../..' . '/core/core/src/Controllers/WordPressController.php', 'SureCartCore\Csrf\Csrf' => __DIR__ . '/../..' . '/core/core/src/Csrf/Csrf.php', 'SureCartCore\Csrf\CsrfMiddleware' => __DIR__ . '/../..' . '/core/core/src/Csrf/CsrfMiddleware.php', 'SureCartCore\Csrf\CsrfServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Csrf/CsrfServiceProvider.php', 'SureCartCore\Csrf\InvalidCsrfTokenException' => __DIR__ . '/../..' . '/core/core/src/Csrf/InvalidCsrfTokenException.php', 'SureCartCore\Exceptions\ClassNotFoundException' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ClassNotFoundException.php', 'SureCartCore\Exceptions\ConfigurationException' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ConfigurationException.php', 'SureCartCore\Exceptions\ErrorHandler' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ErrorHandler.php', 'SureCartCore\Exceptions\ErrorHandlerInterface' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ErrorHandlerInterface.php', 'SureCartCore\Exceptions\Exception' => __DIR__ . '/../..' . '/core/core/src/Exceptions/Exception.php', 'SureCartCore\Exceptions\ExceptionsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Exceptions/ExceptionsServiceProvider.php', 'SureCartCore\Exceptions\Whoops\DebugDataProvider' => __DIR__ . '/../..' . '/core/core/src/Exceptions/Whoops/DebugDataProvider.php', 'SureCartCore\Flash\Flash' => __DIR__ . '/../..' . '/core/core/src/Flash/Flash.php', 'SureCartCore\Flash\FlashMiddleware' => __DIR__ . '/../..' . '/core/core/src/Flash/FlashMiddleware.php', 'SureCartCore\Flash\FlashServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Flash/FlashServiceProvider.php', 'SureCartCore\Helpers\Arguments' => __DIR__ . '/../..' . '/core/core/src/Helpers/Arguments.php', 'SureCartCore\Helpers\Handler' => __DIR__ . '/../..' . '/core/core/src/Helpers/Handler.php', 'SureCartCore\Helpers\HandlerFactory' => __DIR__ . '/../..' . '/core/core/src/Helpers/HandlerFactory.php', 'SureCartCore\Helpers\HasAttributesInterface' => __DIR__ . '/../..' . '/core/core/src/Helpers/HasAttributesInterface.php', 'SureCartCore\Helpers\HasAttributesTrait' => __DIR__ . '/../..' . '/core/core/src/Helpers/HasAttributesTrait.php', 'SureCartCore\Helpers\MixedType' => __DIR__ . '/../..' . '/core/core/src/Helpers/MixedType.php', 'SureCartCore\Helpers\Url' => __DIR__ . '/../..' . '/core/core/src/Helpers/Url.php', 'SureCartCore\Input\OldInput' => __DIR__ . '/../..' . '/core/core/src/Input/OldInput.php', 'SureCartCore\Input\OldInputMiddleware' => __DIR__ . '/../..' . '/core/core/src/Input/OldInputMiddleware.php', 'SureCartCore\Input\OldInputServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Input/OldInputServiceProvider.php', 'SureCartCore\Kernels\HttpKernel' => __DIR__ . '/../..' . '/core/core/src/Kernels/HttpKernel.php', 'SureCartCore\Kernels\HttpKernelInterface' => __DIR__ . '/../..' . '/core/core/src/Kernels/HttpKernelInterface.php', 'SureCartCore\Kernels\KernelsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Kernels/KernelsServiceProvider.php', 'SureCartCore\Middleware\ControllerMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/ControllerMiddleware.php', 'SureCartCore\Middleware\ExecutesMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/ExecutesMiddlewareTrait.php', 'SureCartCore\Middleware\HasControllerMiddlewareInterface' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasControllerMiddlewareInterface.php', 'SureCartCore\Middleware\HasControllerMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasControllerMiddlewareTrait.php', 'SureCartCore\Middleware\HasMiddlewareDefinitionsInterface' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasMiddlewareDefinitionsInterface.php', 'SureCartCore\Middleware\HasMiddlewareDefinitionsTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/HasMiddlewareDefinitionsTrait.php', 'SureCartCore\Middleware\MiddlewareServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Middleware/MiddlewareServiceProvider.php', 'SureCartCore\Middleware\ReadsHandlerMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Middleware/ReadsHandlerMiddlewareTrait.php', 'SureCartCore\Middleware\UserCanMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserCanMiddleware.php', 'SureCartCore\Middleware\UserLoggedInMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserLoggedInMiddleware.php', 'SureCartCore\Middleware\UserLoggedOutMiddleware' => __DIR__ . '/../..' . '/core/core/src/Middleware/UserLoggedOutMiddleware.php', 'SureCartCore\Requests\Request' => __DIR__ . '/../..' . '/core/core/src/Requests/Request.php', 'SureCartCore\Requests\RequestInterface' => __DIR__ . '/../..' . '/core/core/src/Requests/RequestInterface.php', 'SureCartCore\Requests\RequestsServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Requests/RequestsServiceProvider.php', 'SureCartCore\Responses\ConvertsToResponseTrait' => __DIR__ . '/../..' . '/core/core/src/Responses/ConvertsToResponseTrait.php', 'SureCartCore\Responses\RedirectResponse' => __DIR__ . '/../..' . '/core/core/src/Responses/RedirectResponse.php', 'SureCartCore\Responses\ResponsableInterface' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponsableInterface.php', 'SureCartCore\Responses\ResponseService' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponseService.php', 'SureCartCore\Responses\ResponsesServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Responses/ResponsesServiceProvider.php', 'SureCartCore\Routing\Conditions\AdminCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/AdminCondition.php', 'SureCartCore\Routing\Conditions\AjaxCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/AjaxCondition.php', 'SureCartCore\Routing\Conditions\CanFilterQueryInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/CanFilterQueryInterface.php', 'SureCartCore\Routing\Conditions\ConditionFactory' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/ConditionFactory.php', 'SureCartCore\Routing\Conditions\ConditionInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/ConditionInterface.php', 'SureCartCore\Routing\Conditions\CustomCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/CustomCondition.php', 'SureCartCore\Routing\Conditions\MultipleCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/MultipleCondition.php', 'SureCartCore\Routing\Conditions\NegateCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/NegateCondition.php', 'SureCartCore\Routing\Conditions\PostIdCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostIdCondition.php', 'SureCartCore\Routing\Conditions\PostSlugCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostSlugCondition.php', 'SureCartCore\Routing\Conditions\PostStatusCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostStatusCondition.php', 'SureCartCore\Routing\Conditions\PostTemplateCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostTemplateCondition.php', 'SureCartCore\Routing\Conditions\PostTypeCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/PostTypeCondition.php', 'SureCartCore\Routing\Conditions\QueryVarCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/QueryVarCondition.php', 'SureCartCore\Routing\Conditions\UrlCondition' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/UrlCondition.php', 'SureCartCore\Routing\Conditions\UrlableInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/Conditions/UrlableInterface.php', 'SureCartCore\Routing\HasQueryFilterInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/HasQueryFilterInterface.php', 'SureCartCore\Routing\HasQueryFilterTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/HasQueryFilterTrait.php', 'SureCartCore\Routing\HasRoutesInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/HasRoutesInterface.php', 'SureCartCore\Routing\HasRoutesTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/HasRoutesTrait.php', 'SureCartCore\Routing\NotFoundException' => __DIR__ . '/../..' . '/core/core/src/Routing/NotFoundException.php', 'SureCartCore\Routing\Route' => __DIR__ . '/../..' . '/core/core/src/Routing/Route.php', 'SureCartCore\Routing\RouteBlueprint' => __DIR__ . '/../..' . '/core/core/src/Routing/RouteBlueprint.php', 'SureCartCore\Routing\RouteInterface' => __DIR__ . '/../..' . '/core/core/src/Routing/RouteInterface.php', 'SureCartCore\Routing\Router' => __DIR__ . '/../..' . '/core/core/src/Routing/Router.php', 'SureCartCore\Routing\RoutingServiceProvider' => __DIR__ . '/../..' . '/core/core/src/Routing/RoutingServiceProvider.php', 'SureCartCore\Routing\SortsMiddlewareTrait' => __DIR__ . '/../..' . '/core/core/src/Routing/SortsMiddlewareTrait.php', 'SureCartCore\ServiceProviders\ExtendsConfigTrait' => __DIR__ . '/../..' . '/core/core/src/ServiceProviders/ExtendsConfigTrait.php', 'SureCartCore\ServiceProviders\ServiceProviderInterface' => __DIR__ . '/../..' . '/core/core/src/ServiceProviders/ServiceProviderInterface.php', 'SureCartCore\Support\Arr' => __DIR__ . '/../..' . '/core/core/src/Support/Arr.php', 'SureCartCore\View\HasContextInterface' => __DIR__ . '/../..' . '/core/core/src/View/HasContextInterface.php', 'SureCartCore\View\HasContextTrait' => __DIR__ . '/../..' . '/core/core/src/View/HasContextTrait.php', 'SureCartCore\View\HasNameTrait' => __DIR__ . '/../..' . '/core/core/src/View/HasNameTrait.php', 'SureCartCore\View\NameProxyViewEngine' => __DIR__ . '/../..' . '/core/core/src/View/NameProxyViewEngine.php', 'SureCartCore\View\PhpView' => __DIR__ . '/../..' . '/core/core/src/View/PhpView.php', 'SureCartCore\View\PhpViewEngine' => __DIR__ . '/../..' . '/core/core/src/View/PhpViewEngine.php', 'SureCartCore\View\PhpViewFilesystemFinder' => __DIR__ . '/../..' . '/core/core/src/View/PhpViewFilesystemFinder.php', 'SureCartCore\View\ViewEngineInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewEngineInterface.php', 'SureCartCore\View\ViewException' => __DIR__ . '/../..' . '/core/core/src/View/ViewException.php', 'SureCartCore\View\ViewFinderInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewFinderInterface.php', 'SureCartCore\View\ViewInterface' => __DIR__ . '/../..' . '/core/core/src/View/ViewInterface.php', 'SureCartCore\View\ViewNotFoundException' => __DIR__ . '/../..' . '/core/core/src/View/ViewNotFoundException.php', 'SureCartCore\View\ViewService' => __DIR__ . '/../..' . '/core/core/src/View/ViewService.php', 'SureCartCore\View\ViewServiceProvider' => __DIR__ . '/../..' . '/core/core/src/View/ViewServiceProvider.php', 'SureCartVendors\GuzzleHttp\Psr7\AppendStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/AppendStream.php', 'SureCartVendors\GuzzleHttp\Psr7\BufferStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/BufferStream.php', 'SureCartVendors\GuzzleHttp\Psr7\CachingStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/CachingStream.php', 'SureCartVendors\GuzzleHttp\Psr7\DroppingStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/DroppingStream.php', 'SureCartVendors\GuzzleHttp\Psr7\FnStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/FnStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Header' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Header.php', 'SureCartVendors\GuzzleHttp\Psr7\InflateStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/InflateStream.php', 'SureCartVendors\GuzzleHttp\Psr7\LazyOpenStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/LazyOpenStream.php', 'SureCartVendors\GuzzleHttp\Psr7\LimitStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/LimitStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Message' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Message.php', 'SureCartVendors\GuzzleHttp\Psr7\MessageTrait' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MessageTrait.php', 'SureCartVendors\GuzzleHttp\Psr7\MimeType' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MimeType.php', 'SureCartVendors\GuzzleHttp\Psr7\MultipartStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/MultipartStream.php', 'SureCartVendors\GuzzleHttp\Psr7\NoSeekStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/NoSeekStream.php', 'SureCartVendors\GuzzleHttp\Psr7\PumpStream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/PumpStream.php', 'SureCartVendors\GuzzleHttp\Psr7\Query' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Query.php', 'SureCartVendors\GuzzleHttp\Psr7\Request' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Request.php', 'SureCartVendors\GuzzleHttp\Psr7\Response' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Response.php', 'SureCartVendors\GuzzleHttp\Psr7\Rfc7230' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc7230.php', 'SureCartVendors\GuzzleHttp\Psr7\ServerRequest' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/ServerRequest.php', 'SureCartVendors\GuzzleHttp\Psr7\Stream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Stream.php', 'SureCartVendors\GuzzleHttp\Psr7\StreamDecoratorTrait' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/StreamDecoratorTrait.php', 'SureCartVendors\GuzzleHttp\Psr7\StreamWrapper' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/StreamWrapper.php', 'SureCartVendors\GuzzleHttp\Psr7\UploadedFile' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UploadedFile.php', 'SureCartVendors\GuzzleHttp\Psr7\Uri' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Uri.php', 'SureCartVendors\GuzzleHttp\Psr7\UriComparator' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriComparator.php', 'SureCartVendors\GuzzleHttp\Psr7\UriNormalizer' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriNormalizer.php', 'SureCartVendors\GuzzleHttp\Psr7\UriResolver' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/UriResolver.php', 'SureCartVendors\GuzzleHttp\Psr7\Utils' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Utils.php', 'SureCartVendors\Pimple\Container' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Container.php', 'SureCartVendors\Pimple\Exception\ExpectedInvokableException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/ExpectedInvokableException.php', 'SureCartVendors\Pimple\Exception\FrozenServiceException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/FrozenServiceException.php', 'SureCartVendors\Pimple\Exception\InvalidServiceIdentifierException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/InvalidServiceIdentifierException.php', 'SureCartVendors\Pimple\Exception\UnknownIdentifierException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/UnknownIdentifierException.php', 'SureCartVendors\Pimple\Psr11\Container' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Psr11/Container.php', 'SureCartVendors\Pimple\Psr11\ServiceLocator' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Psr11/ServiceLocator.php', 'SureCartVendors\Pimple\ServiceIterator' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/ServiceIterator.php', 'SureCartVendors\Pimple\ServiceProviderInterface' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/ServiceProviderInterface.php', 'SureCartVendors\Pimple\Tests\Fixtures\Invokable' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/Invokable.php', 'SureCartVendors\Pimple\Tests\Fixtures\NonInvokable' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/NonInvokable.php', 'SureCartVendors\Pimple\Tests\Fixtures\PimpleServiceProvider' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/PimpleServiceProvider.php', 'SureCartVendors\Pimple\Tests\Fixtures\Service' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Fixtures/Service.php', 'SureCartVendors\Pimple\Tests\PimpleServiceProviderInterfaceTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/PimpleServiceProviderInterfaceTest.php', 'SureCartVendors\Pimple\Tests\PimpleTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/PimpleTest.php', 'SureCartVendors\Pimple\Tests\Psr11\ContainerTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ContainerTest.php', 'SureCartVendors\Pimple\Tests\Psr11\ServiceLocatorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ServiceLocatorTest.php', 'SureCartVendors\Pimple\Tests\ServiceIteratorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/ServiceIteratorTest.php', 'SureCartVendors\PluginEver\QueryBuilder\Collection' => __DIR__ . '/..' . '/surecart/wp-query-builder/src/Collection.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\Arrayable' => __DIR__ . '/..' . '/surecart/wp-query-builder/src/Interfaces/Arrayable.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\JSONable' => __DIR__ . '/..' . '/surecart/wp-query-builder/src/Interfaces/JSONable.php', 'SureCartVendors\PluginEver\QueryBuilder\Interfaces\Stringable' => __DIR__ . '/..' . '/surecart/wp-query-builder/src/Interfaces/Stringable.php', 'SureCartVendors\PluginEver\QueryBuilder\Query' => __DIR__ . '/..' . '/surecart/wp-query-builder/src/Query.php', 'SureCartVendors\Psr\Container\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php', 'SureCartVendors\Psr\Container\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php', 'SureCartVendors\Psr\Container\NotFoundExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/NotFoundExceptionInterface.php', 'SureCartVendors\Psr\Http\Message\MessageInterface' => __DIR__ . '/..' . '/psr/http-message/src/MessageInterface.php', 'SureCartVendors\Psr\Http\Message\RequestInterface' => __DIR__ . '/..' . '/psr/http-message/src/RequestInterface.php', 'SureCartVendors\Psr\Http\Message\ResponseInterface' => __DIR__ . '/..' . '/psr/http-message/src/ResponseInterface.php', 'SureCartVendors\Psr\Http\Message\ServerRequestInterface' => __DIR__ . '/..' . '/psr/http-message/src/ServerRequestInterface.php', 'SureCartVendors\Psr\Http\Message\StreamInterface' => __DIR__ . '/..' . '/psr/http-message/src/StreamInterface.php', 'SureCartVendors\Psr\Http\Message\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php', 'SureCartVendors\Psr\Http\Message\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php', 'SureCart\Account\AccountService' => __DIR__ . '/../..' . '/app/src/Account/AccountService.php', 'SureCart\Account\AccountServiceProvider' => __DIR__ . '/../..' . '/app/src/Account/AccountServiceProvider.php', 'SureCart\Activation\ActivationService' => __DIR__ . '/../..' . '/app/src/Activation/ActivationService.php', 'SureCart\Activation\ActivationServiceProvider' => __DIR__ . '/../..' . '/app/src/Activation/ActivationServiceProvider.php', 'SureCart\Background\AsyncRequest' => __DIR__ . '/../..' . '/app/src/Background/AsyncRequest.php', 'SureCart\Background\AsyncWebhookService' => __DIR__ . '/../..' . '/app/src/Background/AsyncWebhookService.php', 'SureCart\Background\BackgroundServiceProvider' => __DIR__ . '/../..' . '/app/src/Background/BackgroundServiceProvider.php', 'SureCart\Background\CustomerSyncService' => __DIR__ . '/../..' . '/app/src/Background/CustomerSyncService.php', 'SureCart\Background\QueueService' => __DIR__ . '/../..' . '/app/src/Background/QueueService.php', 'SureCart\Background\SyncService' => __DIR__ . '/../..' . '/app/src/Background/SyncService.php', 'SureCart\BlockLibrary\BlockPatternsService' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockPatternsService.php', 'SureCart\BlockLibrary\BlockService' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockService.php', 'SureCart\BlockLibrary\BlockServiceProvider' => __DIR__ . '/../..' . '/app/src/BlockLibrary/BlockServiceProvider.php', 'SureCart\Cart\CartService' => __DIR__ . '/../..' . '/app/src/Cart/CartService.php', 'SureCart\Cart\CartServiceProvider' => __DIR__ . '/../..' . '/app/src/Cart/CartServiceProvider.php', 'SureCart\Concerns\Arrayable' => __DIR__ . '/../..' . '/app/src/Concerns/Arrayable.php', 'SureCart\Concerns\HasBlockTheme' => __DIR__ . '/../..' . '/app/src/Concerns/HasBlockTheme.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutListTable.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutScriptsController.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutStatsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutStatsScriptsController.php', 'SureCart\Controllers\Admin\Abandoned\AbandonedCheckoutViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Abandoned/AbandonedCheckoutViewController.php', 'SureCart\Controllers\Admin\Account' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Account.php', 'SureCart\Controllers\Admin\AdminController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/AdminController.php', 'SureCart\Controllers\Admin\Bumps\BumpScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpScriptsController.php', 'SureCart\Controllers\Admin\Bumps\BumpsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpsController.php', 'SureCart\Controllers\Admin\Bumps\BumpsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Bumps/BumpsListTable.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsController.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsListTable.php', 'SureCart\Controllers\Admin\CancellationInsights\CancellationInsightsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/CancellationInsights/CancellationInsightsScriptsController.php', 'SureCart\Controllers\Admin\Cart\CartController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Cart/CartController.php', 'SureCart\Controllers\Admin\Cart\CartScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Cart/CartScriptsController.php', 'SureCart\Controllers\Admin\Checkouts\CheckoutScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Checkouts/CheckoutScriptsController.php', 'SureCart\Controllers\Admin\Checkouts\CheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Checkouts/CheckoutsController.php', 'SureCart\Controllers\Admin\Connection' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Connection.php', 'SureCart\Controllers\Admin\Coupons\CouponScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponScriptsController.php', 'SureCart\Controllers\Admin\Coupons\CouponsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponsController.php', 'SureCart\Controllers\Admin\Coupons\CouponsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Coupons/CouponsListTable.php', 'SureCart\Controllers\Admin\Customers\CustomersController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersController.php', 'SureCart\Controllers\Admin\Customers\CustomersListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersListTable.php', 'SureCart\Controllers\Admin\Customers\CustomersScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Customers/CustomersScriptsController.php', 'SureCart\Controllers\Admin\Dashboard\DashboardController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Dashboard/DashboardController.php', 'SureCart\Controllers\Admin\Dashboard\DashboardScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Dashboard/DashboardScriptsController.php', 'SureCart\Controllers\Admin\Invoices\InvoiceScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoiceScriptsController.php', 'SureCart\Controllers\Admin\Invoices\InvoicesListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoicesListTable.php', 'SureCart\Controllers\Admin\Invoices\InvoicesViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Invoices/InvoicesViewController.php', 'SureCart\Controllers\Admin\Licenses\LicensesController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesController.php', 'SureCart\Controllers\Admin\Licenses\LicensesListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesListTable.php', 'SureCart\Controllers\Admin\Licenses\LicensesScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Licenses/LicensesScriptsController.php', 'SureCart\Controllers\Admin\Onboarding\OnboardingController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Onboarding/OnboardingController.php', 'SureCart\Controllers\Admin\Onboarding\OnboardingScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Onboarding/OnboardingScriptsController.php', 'SureCart\Controllers\Admin\Orders\OrderScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrderScriptsController.php', 'SureCart\Controllers\Admin\Orders\OrdersListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrdersListTable.php', 'SureCart\Controllers\Admin\Orders\OrdersViewController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Orders/OrdersViewController.php', 'SureCart\Controllers\Admin\PluginSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/PluginSettings.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsController.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsListTable.php', 'SureCart\Controllers\Admin\ProductGroups\ProductGroupsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/ProductGroups/ProductGroupsScriptsController.php', 'SureCart\Controllers\Admin\Products\ProductScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductScriptsController.php', 'SureCart\Controllers\Admin\Products\ProductsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductsController.php', 'SureCart\Controllers\Admin\Products\ProductsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Products/ProductsListTable.php', 'SureCart\Controllers\Admin\Settings\AbandonedCheckoutSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AbandonedCheckoutSettings.php', 'SureCart\Controllers\Admin\Settings\AccountSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AccountSettings.php', 'SureCart\Controllers\Admin\Settings\AdvancedSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/AdvancedSettings.php', 'SureCart\Controllers\Admin\Settings\BaseSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/BaseSettings.php', 'SureCart\Controllers\Admin\Settings\BrandSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/BrandSettings.php', 'SureCart\Controllers\Admin\Settings\CacheSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/CacheSettings.php', 'SureCart\Controllers\Admin\Settings\ConnectionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ConnectionSettings.php', 'SureCart\Controllers\Admin\Settings\CustomerSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/CustomerSettings.php', 'SureCart\Controllers\Admin\Settings\ExportSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ExportSettings.php', 'SureCart\Controllers\Admin\Settings\OrderSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/OrderSettings.php', 'SureCart\Controllers\Admin\Settings\ProcessorsSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ProcessorsSettings.php', 'SureCart\Controllers\Admin\Settings\ShippingProfileSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ShippingProfileSettings.php', 'SureCart\Controllers\Admin\Settings\ShippingSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/ShippingSettings.php', 'SureCart\Controllers\Admin\Settings\SubscriptionPreservationSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/SubscriptionPreservationSettings.php', 'SureCart\Controllers\Admin\Settings\SubscriptionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/SubscriptionSettings.php', 'SureCart\Controllers\Admin\Settings\TaxRegionSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/TaxRegionSettings.php', 'SureCart\Controllers\Admin\Settings\TaxSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/TaxSettings.php', 'SureCart\Controllers\Admin\Settings\UpgradeSettings' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Settings/UpgradeSettings.php', 'SureCart\Controllers\Admin\SubscriptionInsights\SubscriptionInsightsScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/SubscriptionInsights/SubscriptionInsightsScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\Scripts\EditScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/Scripts/EditScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\Scripts\ShowScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/Scripts/ShowScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionScriptsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionScriptsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionsController.php', 'SureCart\Controllers\Admin\Subscriptions\SubscriptionsListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Subscriptions/SubscriptionsListTable.php', 'SureCart\Controllers\Admin\Tables\ListTable' => __DIR__ . '/../..' . '/app/src/Controllers/Admin/Tables/ListTable.php', 'SureCart\Controllers\Ajax\NonceController' => __DIR__ . '/../..' . '/app/src/Controllers/Ajax/NonceController.php', 'SureCart\Controllers\Rest\AbandonedCheckoutProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AbandonedCheckoutProtocolController.php', 'SureCart\Controllers\Rest\AbandonedCheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AbandonedCheckoutsController.php', 'SureCart\Controllers\Rest\AccountController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/AccountController.php', 'SureCart\Controllers\Rest\ActivationsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ActivationsController.php', 'SureCart\Controllers\Rest\BalanceTransactionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BalanceTransactionsController.php', 'SureCart\Controllers\Rest\BrandController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BrandController.php', 'SureCart\Controllers\Rest\BumpsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/BumpsController.php', 'SureCart\Controllers\Rest\CancellationActsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CancellationActsController.php', 'SureCart\Controllers\Rest\CancellationReasonsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CancellationReasonsController.php', 'SureCart\Controllers\Rest\ChargesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ChargesController.php', 'SureCart\Controllers\Rest\CheckEmailController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CheckEmailController.php', 'SureCart\Controllers\Rest\CheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CheckoutsController.php', 'SureCart\Controllers\Rest\CouponsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CouponsController.php', 'SureCart\Controllers\Rest\CustomerController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerController.php', 'SureCart\Controllers\Rest\CustomerLinksController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerLinksController.php', 'SureCart\Controllers\Rest\CustomerNotificationProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/CustomerNotificationProtocolController.php', 'SureCart\Controllers\Rest\DownloadsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/DownloadsController.php', 'SureCart\Controllers\Rest\DraftCheckoutsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/DraftCheckoutsController.php', 'SureCart\Controllers\Rest\FulfillmentsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/FulfillmentsController.php', 'SureCart\Controllers\Rest\IncomingWebhooksController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/IncomingWebhooksController.php', 'SureCart\Controllers\Rest\IntegrationProvidersController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/IntegrationProvidersController.php', 'SureCart\Controllers\Rest\IntegrationsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/IntegrationsController.php', 'SureCart\Controllers\Rest\InvoicesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/InvoicesController.php', 'SureCart\Controllers\Rest\LicensesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LicensesController.php', 'SureCart\Controllers\Rest\LineItemsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LineItemsController.php', 'SureCart\Controllers\Rest\LoginController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/LoginController.php', 'SureCart\Controllers\Rest\ManualPaymentMethodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ManualPaymentMethodsController.php', 'SureCart\Controllers\Rest\MediasController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/MediasController.php', 'SureCart\Controllers\Rest\OrderController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/OrderController.php', 'SureCart\Controllers\Rest\OrderProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/OrderProtocolController.php', 'SureCart\Controllers\Rest\PaymentIntentsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PaymentIntentsController.php', 'SureCart\Controllers\Rest\PaymentMethodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PaymentMethodsController.php', 'SureCart\Controllers\Rest\PeriodsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PeriodsController.php', 'SureCart\Controllers\Rest\PortalProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PortalProtocolController.php', 'SureCart\Controllers\Rest\PricesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PricesController.php', 'SureCart\Controllers\Rest\ProcessorController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProcessorController.php', 'SureCart\Controllers\Rest\ProductGroupsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductGroupsController.php', 'SureCart\Controllers\Rest\ProductMediaController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductMediaController.php', 'SureCart\Controllers\Rest\ProductsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProductsController.php', 'SureCart\Controllers\Rest\PromotionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PromotionsController.php', 'SureCart\Controllers\Rest\ProvisionalAccountController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ProvisionalAccountController.php', 'SureCart\Controllers\Rest\PurchasesController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/PurchasesController.php', 'SureCart\Controllers\Rest\RefundsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/RefundsController.php', 'SureCart\Controllers\Rest\RegisteredWebhookController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/RegisteredWebhookController.php', 'SureCart\Controllers\Rest\RestController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/RestController.php', 'SureCart\Controllers\Rest\SettingsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SettingsController.php', 'SureCart\Controllers\Rest\ShippingMethodController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingMethodController.php', 'SureCart\Controllers\Rest\ShippingProfileController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingProfileController.php', 'SureCart\Controllers\Rest\ShippingProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingProtocolController.php', 'SureCart\Controllers\Rest\ShippingRateController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingRateController.php', 'SureCart\Controllers\Rest\ShippingZoneController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/ShippingZoneController.php', 'SureCart\Controllers\Rest\StatisticsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/StatisticsController.php', 'SureCart\Controllers\Rest\SubscriptionProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SubscriptionProtocolController.php', 'SureCart\Controllers\Rest\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/SubscriptionsController.php', 'SureCart\Controllers\Rest\TaxProtocolController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxProtocolController.php', 'SureCart\Controllers\Rest\TaxRegistrationController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxRegistrationController.php', 'SureCart\Controllers\Rest\TaxZoneController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/TaxZoneController.php', 'SureCart\Controllers\Rest\UploadsController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/UploadsController.php', 'SureCart\Controllers\Rest\VerificationCodeController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/VerificationCodeController.php', 'SureCart\Controllers\Rest\WebhookController' => __DIR__ . '/../..' . '/app/src/Controllers/Rest/WebhookController.php', 'SureCart\Controllers\Web\BuyPageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/BuyPageController.php', 'SureCart\Controllers\Web\DashboardController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/DashboardController.php', 'SureCart\Controllers\Web\ProductPageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/ProductPageController.php', 'SureCart\Controllers\Web\ProductTypePageController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/ProductTypePageController.php', 'SureCart\Controllers\Web\PurchaseController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/PurchaseController.php', 'SureCart\Controllers\Web\SubscriptionsController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/SubscriptionsController.php', 'SureCart\Controllers\Web\WebhookController' => __DIR__ . '/../..' . '/app/src/Controllers/Web/WebhookController.php', 'SureCart\Database\GeneralMigration' => __DIR__ . '/../..' . '/app/src/Database/GeneralMigration.php', 'SureCart\Database\MigrationsServiceProvider' => __DIR__ . '/../..' . '/app/src/Database/MigrationsServiceProvider.php', 'SureCart\Database\Table' => __DIR__ . '/../..' . '/app/src/Database/Table.php', 'SureCart\Database\Tables\IncomingWebhook' => __DIR__ . '/../..' . '/app/src/Database/Tables/IncomingWebhook.php', 'SureCart\Database\Tables\Integrations' => __DIR__ . '/../..' . '/app/src/Database/Tables/Integrations.php', 'SureCart\Database\UpdateMigrationServiceProvider' => __DIR__ . '/../..' . '/app/src/Database/UpdateMigrationServiceProvider.php', 'SureCart\Database\UserMetaMigrationsService' => __DIR__ . '/../..' . '/app/src/Database/UserMetaMigrationsService.php', 'SureCart\Database\WebhookMigrationsService' => __DIR__ . '/../..' . '/app/src/Database/WebhookMigrationsService.php', 'SureCart\Form\FormValidationService' => __DIR__ . '/../..' . '/app/src/Form/FormValidationService.php', 'SureCart\Install\InstallService' => __DIR__ . '/../..' . '/app/src/Install/InstallService.php', 'SureCart\Install\InstallServiceProvider' => __DIR__ . '/../..' . '/app/src/Install/InstallServiceProvider.php', 'SureCart\Integrations\AbstractIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AbstractIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPRecurringIntegration' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPRecurringIntegration.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPService' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPService.php', 'SureCart\Integrations\AffiliateWP\AffiliateWPServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/AffiliateWP/AffiliateWPServiceProvider.php', 'SureCart\Integrations\Beaver\BeaverFormModule' => __DIR__ . '/../..' . '/app/src/Integrations/Beaver/BeaverFormModule.php', 'SureCart\Integrations\Beaver\BeaverServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/Beaver/BeaverServiceProvider.php', 'SureCart\Integrations\BuddyBoss\BuddyBossService' => __DIR__ . '/../..' . '/app/src/Integrations/BuddyBoss/BuddyBossService.php', 'SureCart\Integrations\BuddyBoss\BuddyBossServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/BuddyBoss/BuddyBossServiceProvider.php', 'SureCart\Integrations\Contracts\IntegrationInterface' => __DIR__ . '/../..' . '/app/src/Integrations/Contracts/IntegrationInterface.php', 'SureCart\Integrations\Contracts\PurchaseSyncInterface' => __DIR__ . '/../..' . '/app/src/Integrations/Contracts/PurchaseSyncInterface.php', 'SureCart\Integrations\DiviServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/DiviServiceProvider.php', 'SureCart\Integrations\Elementor\Conditions\Conditions' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/Conditions.php', 'SureCart\Integrations\Elementor\Conditions\ProductCondition' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/ProductCondition.php', 'SureCart\Integrations\Elementor\Conditions\ProductSingle' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Conditions/ProductSingle.php', 'SureCart\Integrations\Elementor\Documents\ProductDocument' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/Documents/ProductDocument.php', 'SureCart\Integrations\Elementor\ElementorServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/ElementorServiceProvider.php', 'SureCart\Integrations\Elementor\ReusableFormWidget' => __DIR__ . '/../..' . '/app/src/Integrations/Elementor/ReusableFormWidget.php', 'SureCart\Integrations\IntegrationService' => __DIR__ . '/../..' . '/app/src/Integrations/IntegrationService.php', 'SureCart\Integrations\LearnDashGroup\LearnDashGroupService' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDashGroup/LearnDashGroupService.php', 'SureCart\Integrations\LearnDashGroup\LearnDashGroupServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDashGroup/LearnDashGroupServiceProvider.php', 'SureCart\Integrations\LearnDash\LearnDashService' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDash/LearnDashService.php', 'SureCart\Integrations\LearnDash\LearnDashServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LearnDash/LearnDashServiceProvider.php', 'SureCart\Integrations\LifterLMS\LifterLMSService' => __DIR__ . '/../..' . '/app/src/Integrations/LifterLMS/LifterLMSService.php', 'SureCart\Integrations\LifterLMS\LifterLMSServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/LifterLMS/LifterLMSServiceProvider.php', 'SureCart\Integrations\MemberPress\MemberPressService' => __DIR__ . '/../..' . '/app/src/Integrations/MemberPress/MemberPressService.php', 'SureCart\Integrations\MemberPress\MemberPressServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/MemberPress/MemberPressServiceProvider.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductIDDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductIDDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\PreviousProductNameField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/PreviousProductNameField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductIDDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductIDDataField.php', 'SureCart\Integrations\ThriveAutomator\DataFields\ProductNameDataField' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataFields/ProductNameDataField.php', 'SureCart\Integrations\ThriveAutomator\DataObjects\PreviousProductDataObject' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataObjects/PreviousProductDataObject.php', 'SureCart\Integrations\ThriveAutomator\DataObjects\ProductDataObject' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/DataObjects/ProductDataObject.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorApp' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorApp.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorService' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorService.php', 'SureCart\Integrations\ThriveAutomator\ThriveAutomatorServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/ThriveAutomatorServiceProvider.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseCreatedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseCreatedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseInvokedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseInvokedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseRevokedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseRevokedTrigger.php', 'SureCart\Integrations\ThriveAutomator\Triggers\PurchaseUpdatedTrigger' => __DIR__ . '/../..' . '/app/src/Integrations/ThriveAutomator/Triggers/PurchaseUpdatedTrigger.php', 'SureCart\Integrations\TutorLMS\TutorLMSService' => __DIR__ . '/../..' . '/app/src/Integrations/TutorLMS/TutorLMSService.php', 'SureCart\Integrations\TutorLMS\TutorLMSServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/TutorLMS/TutorLMSServiceProvider.php', 'SureCart\Integrations\User\UserService' => __DIR__ . '/../..' . '/app/src/Integrations/User/UserService.php', 'SureCart\Integrations\User\UserServiceProvider' => __DIR__ . '/../..' . '/app/src/Integrations/User/UserServiceProvider.php', 'SureCart\Middleware\AccountClaimMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/AccountClaimMiddleware.php', 'SureCart\Middleware\ArchiveModelMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/ArchiveModelMiddleware.php', 'SureCart\Middleware\BrandColorMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/BrandColorMiddleware.php', 'SureCart\Middleware\CheckoutRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/CheckoutRedirectMiddleware.php', 'SureCart\Middleware\ComponentAssetsMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/ComponentAssetsMiddleware.php', 'SureCart\Middleware\CustomerDashboardRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/CustomerDashboardRedirectMiddleware.php', 'SureCart\Middleware\EditModelMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/EditModelMiddleware.php', 'SureCart\Middleware\LoginLinkMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/LoginLinkMiddleware.php', 'SureCart\Middleware\LoginMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/LoginMiddleware.php', 'SureCart\Middleware\NonceMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/NonceMiddleware.php', 'SureCart\Middleware\OrderRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/OrderRedirectMiddleware.php', 'SureCart\Middleware\PathRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PathRedirectMiddleware.php', 'SureCart\Middleware\PaymentFailureRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PaymentFailureRedirectMiddleware.php', 'SureCart\Middleware\PurchaseRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/PurchaseRedirectMiddleware.php', 'SureCart\Middleware\SubscriptionRedirectMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/SubscriptionRedirectMiddleware.php', 'SureCart\Middleware\WebhooksMiddleware' => __DIR__ . '/../..' . '/app/src/Middleware/WebhooksMiddleware.php', 'SureCart\Models\AbandonedCheckout' => __DIR__ . '/../..' . '/app/src/Models/AbandonedCheckout.php', 'SureCart\Models\AbandonedCheckoutProtocol' => __DIR__ . '/../..' . '/app/src/Models/AbandonedCheckoutProtocol.php', 'SureCart\Models\Account' => __DIR__ . '/../..' . '/app/src/Models/Account.php', 'SureCart\Models\AccountPortalSession' => __DIR__ . '/../..' . '/app/src/Models/AccountPortalSession.php', 'SureCart\Models\Activation' => __DIR__ . '/../..' . '/app/src/Models/Activation.php', 'SureCart\Models\ApiToken' => __DIR__ . '/../..' . '/app/src/Models/ApiToken.php', 'SureCart\Models\BalanceTransaction' => __DIR__ . '/../..' . '/app/src/Models/BalanceTransaction.php', 'SureCart\Models\Brand' => __DIR__ . '/../..' . '/app/src/Models/Brand.php', 'SureCart\Models\Bump' => __DIR__ . '/../..' . '/app/src/Models/Bump.php', 'SureCart\Models\BuyLink' => __DIR__ . '/../..' . '/app/src/Models/BuyLink.php', 'SureCart\Models\CancellationAct' => __DIR__ . '/../..' . '/app/src/Models/CancellationAct.php', 'SureCart\Models\CancellationReason' => __DIR__ . '/../..' . '/app/src/Models/CancellationReason.php', 'SureCart\Models\Charge' => __DIR__ . '/../..' . '/app/src/Models/Charge.php', 'SureCart\Models\Checkout' => __DIR__ . '/../..' . '/app/src/Models/Checkout.php', 'SureCart\Models\Collection' => __DIR__ . '/../..' . '/app/src/Models/Collection.php', 'SureCart\Models\Component' => __DIR__ . '/../..' . '/app/src/Models/Component.php', 'SureCart\Models\Coupon' => __DIR__ . '/../..' . '/app/src/Models/Coupon.php', 'SureCart\Models\Customer' => __DIR__ . '/../..' . '/app/src/Models/Customer.php', 'SureCart\Models\CustomerLink' => __DIR__ . '/../..' . '/app/src/Models/CustomerLink.php', 'SureCart\Models\CustomerNotificationProtocol' => __DIR__ . '/../..' . '/app/src/Models/CustomerNotificationProtocol.php', 'SureCart\Models\DatabaseModel' => __DIR__ . '/../..' . '/app/src/Models/DatabaseModel.php', 'SureCart\Models\Download' => __DIR__ . '/../..' . '/app/src/Models/Download.php', 'SureCart\Models\Event' => __DIR__ . '/../..' . '/app/src/Models/Event.php', 'SureCart\Models\Form' => __DIR__ . '/../..' . '/app/src/Models/Form.php', 'SureCart\Models\Fulfillment' => __DIR__ . '/../..' . '/app/src/Models/Fulfillment.php', 'SureCart\Models\FulfillmentItem' => __DIR__ . '/../..' . '/app/src/Models/FulfillmentItem.php', 'SureCart\Models\IncomingWebhook' => __DIR__ . '/../..' . '/app/src/Models/IncomingWebhook.php', 'SureCart\Models\Integration' => __DIR__ . '/../..' . '/app/src/Models/Integration.php', 'SureCart\Models\Invoice' => __DIR__ . '/../..' . '/app/src/Models/Invoice.php', 'SureCart\Models\License' => __DIR__ . '/../..' . '/app/src/Models/License.php', 'SureCart\Models\LineItem' => __DIR__ . '/../..' . '/app/src/Models/LineItem.php', 'SureCart\Models\ManualPaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/ManualPaymentMethod.php', 'SureCart\Models\Media' => __DIR__ . '/../..' . '/app/src/Models/Media.php', 'SureCart\Models\Model' => __DIR__ . '/../..' . '/app/src/Models/Model.php', 'SureCart\Models\ModelInterface' => __DIR__ . '/../..' . '/app/src/Models/ModelInterface.php', 'SureCart\Models\Order' => __DIR__ . '/../..' . '/app/src/Models/Order.php', 'SureCart\Models\OrderProtocol' => __DIR__ . '/../..' . '/app/src/Models/OrderProtocol.php', 'SureCart\Models\PaymentIntent' => __DIR__ . '/../..' . '/app/src/Models/PaymentIntent.php', 'SureCart\Models\PaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/PaymentMethod.php', 'SureCart\Models\Period' => __DIR__ . '/../..' . '/app/src/Models/Period.php', 'SureCart\Models\PortalProtocol' => __DIR__ . '/../..' . '/app/src/Models/PortalProtocol.php', 'SureCart\Models\PortalSession' => __DIR__ . '/../..' . '/app/src/Models/PortalSession.php', 'SureCart\Models\Price' => __DIR__ . '/../..' . '/app/src/Models/Price.php', 'SureCart\Models\Processor' => __DIR__ . '/../..' . '/app/src/Models/Processor.php', 'SureCart\Models\Product' => __DIR__ . '/../..' . '/app/src/Models/Product.php', 'SureCart\Models\ProductGroup' => __DIR__ . '/../..' . '/app/src/Models/ProductGroup.php', 'SureCart\Models\ProductMedia' => __DIR__ . '/../..' . '/app/src/Models/ProductMedia.php', 'SureCart\Models\Promotion' => __DIR__ . '/../..' . '/app/src/Models/Promotion.php', 'SureCart\Models\ProvisionalAccount' => __DIR__ . '/../..' . '/app/src/Models/ProvisionalAccount.php', 'SureCart\Models\Purchase' => __DIR__ . '/../..' . '/app/src/Models/Purchase.php', 'SureCart\Models\Refund' => __DIR__ . '/../..' . '/app/src/Models/Refund.php', 'SureCart\Models\RegisteredWebhook' => __DIR__ . '/../..' . '/app/src/Models/RegisteredWebhook.php', 'SureCart\Models\ShippingMethod' => __DIR__ . '/../..' . '/app/src/Models/ShippingMethod.php', 'SureCart\Models\ShippingProfile' => __DIR__ . '/../..' . '/app/src/Models/ShippingProfile.php', 'SureCart\Models\ShippingProtocol' => __DIR__ . '/../..' . '/app/src/Models/ShippingProtocol.php', 'SureCart\Models\ShippingRate' => __DIR__ . '/../..' . '/app/src/Models/ShippingRate.php', 'SureCart\Models\ShippingZone' => __DIR__ . '/../..' . '/app/src/Models/ShippingZone.php', 'SureCart\Models\Statistic' => __DIR__ . '/../..' . '/app/src/Models/Statistic.php', 'SureCart\Models\Subscription' => __DIR__ . '/../..' . '/app/src/Models/Subscription.php', 'SureCart\Models\SubscriptionProtocol' => __DIR__ . '/../..' . '/app/src/Models/SubscriptionProtocol.php', 'SureCart\Models\TaxProtocol' => __DIR__ . '/../..' . '/app/src/Models/TaxProtocol.php', 'SureCart\Models\TaxRegistration' => __DIR__ . '/../..' . '/app/src/Models/TaxRegistration.php', 'SureCart\Models\TaxZone' => __DIR__ . '/../..' . '/app/src/Models/TaxZone.php', 'SureCart\Models\Traits\CanFinalize' => __DIR__ . '/../..' . '/app/src/Models/Traits/CanFinalize.php', 'SureCart\Models\Traits\HasCharge' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCharge.php', 'SureCart\Models\Traits\HasCheckout' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCheckout.php', 'SureCart\Models\Traits\HasCoupon' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCoupon.php', 'SureCart\Models\Traits\HasCustomer' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasCustomer.php', 'SureCart\Models\Traits\HasDiscount' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasDiscount.php', 'SureCart\Models\Traits\HasImageSizes' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasImageSizes.php', 'SureCart\Models\Traits\HasOrder' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasOrder.php', 'SureCart\Models\Traits\HasPaymentIntent' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPaymentIntent.php', 'SureCart\Models\Traits\HasPaymentMethod' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPaymentMethod.php', 'SureCart\Models\Traits\HasPrice' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPrice.php', 'SureCart\Models\Traits\HasProcessorType' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasProcessorType.php', 'SureCart\Models\Traits\HasProduct' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasProduct.php', 'SureCart\Models\Traits\HasPurchase' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPurchase.php', 'SureCart\Models\Traits\HasPurchases' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasPurchases.php', 'SureCart\Models\Traits\HasRefund' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasRefund.php', 'SureCart\Models\Traits\HasShippingAddress' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasShippingAddress.php', 'SureCart\Models\Traits\HasSubscription' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasSubscription.php', 'SureCart\Models\Traits\HasSubscriptions' => __DIR__ . '/../..' . '/app/src/Models/Traits/HasSubscriptions.php', 'SureCart\Models\Traits\SyncsCustomer' => __DIR__ . '/../..' . '/app/src/Models/Traits/SyncsCustomer.php', 'SureCart\Models\Upload' => __DIR__ . '/../..' . '/app/src/Models/Upload.php', 'SureCart\Models\User' => __DIR__ . '/../..' . '/app/src/Models/User.php', 'SureCart\Models\VerificationCode' => __DIR__ . '/../..' . '/app/src/Models/VerificationCode.php', 'SureCart\Models\Webhook' => __DIR__ . '/../..' . '/app/src/Models/Webhook.php', 'SureCart\Models\WebhookRegistration' => __DIR__ . '/../..' . '/app/src/Models/WebhookRegistration.php', 'SureCart\Permissions\AdminAccessService' => __DIR__ . '/../..' . '/app/src/Permissions/AdminAccessService.php', 'SureCart\Permissions\Models\BalanceTransactionPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/BalanceTransactionPermissionsController.php', 'SureCart\Permissions\Models\ChargePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/ChargePermissionsController.php', 'SureCart\Permissions\Models\CheckoutPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/CheckoutPermissionsController.php', 'SureCart\Permissions\Models\CustomerPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/CustomerPermissionsController.php', 'SureCart\Permissions\Models\InvoicePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/InvoicePermissionsController.php', 'SureCart\Permissions\Models\LicensePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/LicensePermissionsController.php', 'SureCart\Permissions\Models\MediaPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/MediaPermissionsController.php', 'SureCart\Permissions\Models\ModelPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/ModelPermissionsController.php', 'SureCart\Permissions\Models\OrderPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/OrderPermissionsController.php', 'SureCart\Permissions\Models\PaymentMethodPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/PaymentMethodPermissionsController.php', 'SureCart\Permissions\Models\PurchasePermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/PurchasePermissionsController.php', 'SureCart\Permissions\Models\RefundPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/RefundPermissionsController.php', 'SureCart\Permissions\Models\SubscriptionPermissionsController' => __DIR__ . '/../..' . '/app/src/Permissions/Models/SubscriptionPermissionsController.php', 'SureCart\Permissions\PermissionsService' => __DIR__ . '/../..' . '/app/src/Permissions/PermissionsService.php', 'SureCart\Permissions\RolesService' => __DIR__ . '/../..' . '/app/src/Permissions/RolesService.php', 'SureCart\Permissions\RolesServiceProvider' => __DIR__ . '/../..' . '/app/src/Permissions/RolesServiceProvider.php', 'SureCart\Permissions\WPConfig\WPConfigTransformService' => __DIR__ . '/../..' . '/app/src/Permissions/WPConfig/WPConfigTransformService.php', 'SureCart\Request\RequestCacheService' => __DIR__ . '/../..' . '/app/src/Request/RequestCacheService.php', 'SureCart\Request\RequestService' => __DIR__ . '/../..' . '/app/src/Request/RequestService.php', 'SureCart\Request\RequestServiceProvider' => __DIR__ . '/../..' . '/app/src/Request/RequestServiceProvider.php', 'SureCart\Rest\AbandonedCheckoutProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AbandonedCheckoutProtocolRestServiceProvider.php', 'SureCart\Rest\AbandonedCheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AbandonedCheckoutRestServiceProvider.php', 'SureCart\Rest\AccountRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/AccountRestServiceProvider.php', 'SureCart\Rest\ActivationRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ActivationRestServiceProvider.php', 'SureCart\Rest\BalanceTransactionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BalanceTransactionRestServiceProvider.php', 'SureCart\Rest\BlockPatternsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BlockPatternsRestServiceProvider.php', 'SureCart\Rest\BrandRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BrandRestServiceProvider.php', 'SureCart\Rest\BumpRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/BumpRestServiceProvider.php', 'SureCart\Rest\CancellationActRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CancellationActRestServiceProvider.php', 'SureCart\Rest\CancellationReasonRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CancellationReasonRestServiceProvider.php', 'SureCart\Rest\ChargesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ChargesRestServiceProvider.php', 'SureCart\Rest\CheckEmailRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CheckEmailRestServiceProvider.php', 'SureCart\Rest\CheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CheckoutRestServiceProvider.php', 'SureCart\Rest\CouponRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CouponRestServiceProvider.php', 'SureCart\Rest\CustomerLinksRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerLinksRestServiceProvider.php', 'SureCart\Rest\CustomerNotificationProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerNotificationProtocolRestServiceProvider.php', 'SureCart\Rest\CustomerRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/CustomerRestServiceProvider.php', 'SureCart\Rest\DownloadRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/DownloadRestServiceProvider.php', 'SureCart\Rest\DraftCheckoutRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/DraftCheckoutRestServiceProvider.php', 'SureCart\Rest\FulfillmentRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/FulfillmentRestServiceProvider.php', 'SureCart\Rest\IncomingWebhooksRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/IncomingWebhooksRestServiceProvider.php', 'SureCart\Rest\IntegrationProvidersRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/IntegrationProvidersRestServiceProvider.php', 'SureCart\Rest\IntegrationsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/IntegrationsRestServiceProvider.php', 'SureCart\Rest\InvoicesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/InvoicesRestServiceProvider.php', 'SureCart\Rest\LicenseRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LicenseRestServiceProvider.php', 'SureCart\Rest\LineItemsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LineItemsRestServiceProvider.php', 'SureCart\Rest\LoginRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/LoginRestServiceProvider.php', 'SureCart\Rest\ManualPaymentMethodsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ManualPaymentMethodsRestServiceProvider.php', 'SureCart\Rest\MediaRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/MediaRestServiceProvider.php', 'SureCart\Rest\OrderProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/OrderProtocolRestServiceProvider.php', 'SureCart\Rest\OrderRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/OrderRestServiceProvider.php', 'SureCart\Rest\PaymentIntentsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PaymentIntentsRestServiceProvider.php', 'SureCart\Rest\PaymentMethodsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PaymentMethodsRestServiceProvider.php', 'SureCart\Rest\PeriodRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PeriodRestServiceProvider.php', 'SureCart\Rest\PortalProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PortalProtocolRestServiceProvider.php', 'SureCart\Rest\PriceRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PriceRestServiceProvider.php', 'SureCart\Rest\ProcessorRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProcessorRestServiceProvider.php', 'SureCart\Rest\ProductGroupsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductGroupsRestServiceProvider.php', 'SureCart\Rest\ProductMediaRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductMediaRestServiceProvider.php', 'SureCart\Rest\ProductsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProductsRestServiceProvider.php', 'SureCart\Rest\PromotionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PromotionRestServiceProvider.php', 'SureCart\Rest\ProvisionalAccountRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ProvisionalAccountRestServiceProvider.php', 'SureCart\Rest\PurchasesRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/PurchasesRestServiceProvider.php', 'SureCart\Rest\RefundsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/RefundsRestServiceProvider.php', 'SureCart\Rest\RegisteredWebhookRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/RegisteredWebhookRestServiceProvider.php', 'SureCart\Rest\RestServiceInterface' => __DIR__ . '/../..' . '/app/src/Rest/RestServiceInterface.php', 'SureCart\Rest\RestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/RestServiceProvider.php', 'SureCart\Rest\SettingsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SettingsRestServiceProvider.php', 'SureCart\Rest\ShippingMethodRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingMethodRestServiceProvider.php', 'SureCart\Rest\ShippingProfileRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingProfileRestServiceProvider.php', 'SureCart\Rest\ShippingProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingProtocolRestServiceProvider.php', 'SureCart\Rest\ShippingRateRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingRateRestServiceProvider.php', 'SureCart\Rest\ShippingZoneRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/ShippingZoneRestServiceProvider.php', 'SureCart\Rest\SiteHealthRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SiteHealthRestServiceProvider.php', 'SureCart\Rest\StatisticRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/StatisticRestServiceProvider.php', 'SureCart\Rest\SubscriptionProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SubscriptionProtocolRestServiceProvider.php', 'SureCart\Rest\SubscriptionRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/SubscriptionRestServiceProvider.php', 'SureCart\Rest\TaxProtocolRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxProtocolRestServiceProvider.php', 'SureCart\Rest\TaxRegistrationRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxRegistrationRestServiceProvider.php', 'SureCart\Rest\TaxZoneRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/TaxZoneRestServiceProvider.php', 'SureCart\Rest\UploadsRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/UploadsRestServiceProvider.php', 'SureCart\Rest\VerificationCodeRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/VerificationCodeRestServiceProvider.php', 'SureCart\Rest\WebhooksRestServiceProvider' => __DIR__ . '/../..' . '/app/src/Rest/WebhooksRestServiceProvider.php', 'SureCart\Routing\AdminRouteService' => __DIR__ . '/../..' . '/app/src/Routing/AdminRouteService.php', 'SureCart\Routing\AdminRouteServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/AdminRouteServiceProvider.php', 'SureCart\Routing\AdminURLService' => __DIR__ . '/../..' . '/app/src/Routing/AdminURLService.php', 'SureCart\Routing\PermalinkService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkService.php', 'SureCart\Routing\PermalinkServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkServiceProvider.php', 'SureCart\Routing\PermalinkSettingService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinkSettingService.php', 'SureCart\Routing\PermalinksSettingsService' => __DIR__ . '/../..' . '/app/src/Routing/PermalinksSettingsService.php', 'SureCart\Routing\RouteConditionsServiceProvider' => __DIR__ . '/../..' . '/app/src/Routing/RouteConditionsServiceProvider.php', 'SureCart\Settings\RegisterSettingService' => __DIR__ . '/../..' . '/app/src/Settings/RegisterSettingService.php', 'SureCart\Settings\SettingService' => __DIR__ . '/../..' . '/app/src/Settings/SettingService.php', 'SureCart\Settings\SettingsServiceProvider' => __DIR__ . '/../..' . '/app/src/Settings/SettingsServiceProvider.php', 'SureCart\Support\Arrays' => __DIR__ . '/../..' . '/app/src/Support/Arrays.php', 'SureCart\Support\Blocks\TemplateUtilityService' => __DIR__ . '/../..' . '/app/src/Support/Blocks/TemplateUtilityService.php', 'SureCart\Support\ColorService' => __DIR__ . '/../..' . '/app/src/Support/ColorService.php', 'SureCart\Support\Currency' => __DIR__ . '/../..' . '/app/src/Support/Currency.php', 'SureCart\Support\Encryption' => __DIR__ . '/../..' . '/app/src/Support/Encryption.php', 'SureCart\Support\Errors\ErrorsService' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsService.php', 'SureCart\Support\Errors\ErrorsServiceProvider' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsServiceProvider.php', 'SureCart\Support\Errors\ErrorsTranslationService' => __DIR__ . '/../..' . '/app/src/Support/Errors/ErrorsTranslationService.php', 'SureCart\Support\Scripts\AdminModelEditController' => __DIR__ . '/../..' . '/app/src/Support/Scripts/AdminModelEditController.php', 'SureCart\Support\Server' => __DIR__ . '/../..' . '/app/src/Support/Server.php', 'SureCart\Support\TimeDate' => __DIR__ . '/../..' . '/app/src/Support/TimeDate.php', 'SureCart\Support\URL' => __DIR__ . '/../..' . '/app/src/Support/URL.php', 'SureCart\Support\UtilityService' => __DIR__ . '/../..' . '/app/src/Support/UtilityService.php', 'SureCart\Support\UtilityServiceProvider' => __DIR__ . '/../..' . '/app/src/Support/UtilityServiceProvider.php', 'SureCart\View\ViewServiceProvider' => __DIR__ . '/../..' . '/app/src/View/ViewServiceProvider.php', 'SureCart\Webhooks\WebhooksService' => __DIR__ . '/../..' . '/app/src/Webhooks/WebhooksService.php', 'SureCart\Webhooks\WebhooksServiceProvider' => __DIR__ . '/../..' . '/app/src/Webhooks/WebhooksServiceProvider.php', 'SureCart\WordPress\ActionsService' => __DIR__ . '/../..' . '/app/src/WordPress/ActionsService.php', 'SureCart\WordPress\Admin\Menus\AdminMenuPageService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Menus/AdminMenuPageService.php', 'SureCart\WordPress\Admin\Menus\AdminMenuPageServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Menus/AdminMenuPageServiceProvider.php', 'SureCart\WordPress\Admin\Notices\AdminNoticesService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Notices/AdminNoticesService.php', 'SureCart\WordPress\Admin\Notices\AdminNoticesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Notices/AdminNoticesServiceProvider.php', 'SureCart\WordPress\Admin\Profile\UserProfileService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Profile/UserProfileService.php', 'SureCart\WordPress\Admin\Profile\UserProfileServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/Profile/UserProfileServiceProvider.php', 'SureCart\WordPress\Admin\SSLCheck\AdminSSLCheckService' => __DIR__ . '/../..' . '/app/src/WordPress/Admin/SSLCheck/AdminSSLCheckService.php', 'SureCart\WordPress\Assets\AssetsService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/AssetsService.php', 'SureCart\WordPress\Assets\AssetsServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/AssetsServiceProvider.php', 'SureCart\WordPress\Assets\BlockAssetsLoadService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/BlockAssetsLoadService.php', 'SureCart\WordPress\Assets\PreloadService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/PreloadService.php', 'SureCart\WordPress\Assets\ScriptsService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/ScriptsService.php', 'SureCart\WordPress\Assets\StylesService' => __DIR__ . '/../..' . '/app/src/WordPress/Assets/StylesService.php', 'SureCart\WordPress\CompatibilityService' => __DIR__ . '/../..' . '/app/src/WordPress/CompatibilityService.php', 'SureCart\WordPress\HealthService' => __DIR__ . '/../..' . '/app/src/WordPress/HealthService.php', 'SureCart\WordPress\Pages\PageSeeder' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageSeeder.php', 'SureCart\WordPress\Pages\PageService' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageService.php', 'SureCart\WordPress\Pages\PageServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Pages/PageServiceProvider.php', 'SureCart\WordPress\PluginService' => __DIR__ . '/../..' . '/app/src/WordPress/PluginService.php', 'SureCart\WordPress\PluginServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/PluginServiceProvider.php', 'SureCart\WordPress\PostTypes\CartPostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/CartPostTypeService.php', 'SureCart\WordPress\PostTypes\FormPostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/FormPostTypeService.php', 'SureCart\WordPress\PostTypes\FormPostTypeServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/FormPostTypeServiceProvider.php', 'SureCart\WordPress\PostTypes\ProductPagePostTypeService' => __DIR__ . '/../..' . '/app/src/WordPress/PostTypes/ProductPagePostTypeService.php', 'SureCart\WordPress\RecaptchaValidationService' => __DIR__ . '/../..' . '/app/src/WordPress/RecaptchaValidationService.php', 'SureCart\WordPress\Shortcodes\ShortcodesBlockConversionService' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesBlockConversionService.php', 'SureCart\WordPress\Shortcodes\ShortcodesService' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesService.php', 'SureCart\WordPress\Shortcodes\ShortcodesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Shortcodes/ShortcodesServiceProvider.php', 'SureCart\WordPress\Sitemap\ProductSiteMap' => __DIR__ . '/../..' . '/app/src/WordPress/Sitemap/ProductSiteMap.php', 'SureCart\WordPress\Sitemap\SitemapsService' => __DIR__ . '/../..' . '/app/src/WordPress/Sitemap/SitemapsService.php', 'SureCart\WordPress\Templates\BlockTemplatesService' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/BlockTemplatesService.php', 'SureCart\WordPress\Templates\TemplatesService' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/TemplatesService.php', 'SureCart\WordPress\Templates\TemplatesServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Templates/TemplatesServiceProvider.php', 'SureCart\WordPress\ThemeService' => __DIR__ . '/../..' . '/app/src/WordPress/ThemeService.php', 'SureCart\WordPress\ThemeServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/ThemeServiceProvider.php', 'SureCart\WordPress\TranslationsServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/TranslationsServiceProvider.php', 'SureCart\WordPress\Users\CustomerLinkService' => __DIR__ . '/../..' . '/app/src/WordPress/Users/CustomerLinkService.php', 'SureCart\WordPress\Users\UsersService' => __DIR__ . '/../..' . '/app/src/WordPress/Users/UsersService.php', 'SureCart\WordPress\Users\UsersServiceProvider' => __DIR__ . '/../..' . '/app/src/WordPress/Users/UsersServiceProvider.php', 'TypistTech\Imposter\ArrayUtil' => __DIR__ . '/..' . '/typisttech/imposter/src/ArrayUtil.php', 'TypistTech\Imposter\Config' => __DIR__ . '/..' . '/typisttech/imposter/src/Config.php', 'TypistTech\Imposter\ConfigCollection' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollection.php', 'TypistTech\Imposter\ConfigCollectionFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollectionFactory.php', 'TypistTech\Imposter\ConfigCollectionInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigCollectionInterface.php', 'TypistTech\Imposter\ConfigFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigFactory.php', 'TypistTech\Imposter\ConfigInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ConfigInterface.php', 'TypistTech\Imposter\Filesystem' => __DIR__ . '/..' . '/typisttech/imposter/src/Filesystem.php', 'TypistTech\Imposter\FilesystemInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/FilesystemInterface.php', 'TypistTech\Imposter\Imposter' => __DIR__ . '/..' . '/typisttech/imposter/src/Imposter.php', 'TypistTech\Imposter\ImposterFactory' => __DIR__ . '/..' . '/typisttech/imposter/src/ImposterFactory.php', 'TypistTech\Imposter\ImposterInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ImposterInterface.php', 'TypistTech\Imposter\Plugin\AutoloadMerger' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/AutoloadMerger.php', 'TypistTech\Imposter\Plugin\ImposterPlugin' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/ImposterPlugin.php', 'TypistTech\Imposter\Plugin\Transformer' => __DIR__ . '/..' . '/typisttech/imposter-plugin/src/Transformer.php', 'TypistTech\Imposter\ProjectConfig' => __DIR__ . '/..' . '/typisttech/imposter/src/ProjectConfig.php', 'TypistTech\Imposter\ProjectConfigInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/ProjectConfigInterface.php', 'TypistTech\Imposter\StringUtil' => __DIR__ . '/..' . '/typisttech/imposter/src/StringUtil.php', 'TypistTech\Imposter\Transformer' => __DIR__ . '/..' . '/typisttech/imposter/src/Transformer.php', 'TypistTech\Imposter\TransformerInterface' => __DIR__ . '/..' . '/typisttech/imposter/src/TransformerInterface.php');
         public static function getInitializer(\Composer\Autoload\ClassLoader $loader)
         {
         }
@@ -33598,7 +34541,7 @@ namespace SureCartVendors\Psr\Http\Message {
          *     SEEK_END: Set position to end-of-stream plus offset.
          * @throws \RuntimeException on failure.
          */
-        public function seek($offset, $whence = SEEK_SET);
+        public function seek(int $offset, int $whence = SEEK_SET);
         /**
          * Seek to the beginning of the stream.
          *
@@ -33623,7 +34566,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return int Returns the number of bytes written to the stream.
          * @throws \RuntimeException on failure.
          */
-        public function write($string);
+        public function write(string $string);
         /**
          * Returns whether or not the stream is readable.
          *
@@ -33640,7 +34583,7 @@ namespace SureCartVendors\Psr\Http\Message {
          *     if no bytes are available.
          * @throws \RuntimeException if an error occurs.
          */
-        public function read($length);
+        public function read(int $length);
         /**
          * Returns the remaining contents in a string
          *
@@ -33656,12 +34599,12 @@ namespace SureCartVendors\Psr\Http\Message {
          * stream_get_meta_data() function.
          *
          * @link http://php.net/manual/en/function.stream-get-meta-data.php
-         * @param string $key Specific metadata to retrieve.
+         * @param string|null $key Specific metadata to retrieve.
          * @return array|mixed|null Returns an associative array if no key is
          *     provided. Returns a specific key value if a key is provided and the
          *     value is found, or null if the key is not found.
          */
-        public function getMetadata($key = null);
+        public function getMetadata(?string $key = null);
     }
 }
 namespace SureCartVendors\GuzzleHttp\Psr7 {
@@ -34810,7 +35753,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @throws \RuntimeException on any error during the move operation, or on
          *     the second or subsequent call to the method.
          */
-        public function moveTo($targetPath);
+        public function moveTo(string $targetPath);
         /**
          * Retrieve the file size.
          *
@@ -35228,7 +36171,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static A new instance with the specified scheme.
          * @throws \InvalidArgumentException for invalid or unsupported schemes.
          */
-        public function withScheme($scheme);
+        public function withScheme(string $scheme);
         /**
          * Return an instance with the specified user information.
          *
@@ -35243,7 +36186,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param null|string $password The password associated with $user.
          * @return static A new instance with the specified user information.
          */
-        public function withUserInfo($user, $password = null);
+        public function withUserInfo(string $user, ?string $password = null);
         /**
          * Return an instance with the specified host.
          *
@@ -35256,7 +36199,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static A new instance with the specified host.
          * @throws \InvalidArgumentException for invalid hostnames.
          */
-        public function withHost($host);
+        public function withHost(string $host);
         /**
          * Return an instance with the specified port.
          *
@@ -35274,7 +36217,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static A new instance with the specified port.
          * @throws \InvalidArgumentException for invalid ports.
          */
-        public function withPort($port);
+        public function withPort(?int $port);
         /**
          * Return an instance with the specified path.
          *
@@ -35297,7 +36240,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static A new instance with the specified path.
          * @throws \InvalidArgumentException for invalid paths.
          */
-        public function withPath($path);
+        public function withPath(string $path);
         /**
          * Return an instance with the specified query string.
          *
@@ -35313,7 +36256,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @return static A new instance with the specified query string.
          * @throws \InvalidArgumentException for invalid query strings.
          */
-        public function withQuery($query);
+        public function withQuery(string $query);
         /**
          * Return an instance with the specified URI fragment.
          *
@@ -35328,7 +36271,7 @@ namespace SureCartVendors\Psr\Http\Message {
          * @param string $fragment The fragment to use with the new instance.
          * @return static A new instance with the specified fragment.
          */
-        public function withFragment($fragment);
+        public function withFragment(string $fragment);
         /**
          * Return the string representation as a URI reference.
          *
@@ -41843,7 +42786,7 @@ namespace {
         /**
          * @var array Names of tables that will be registered by this class.
          */
-        protected $tables = [];
+        protected $tables = array();
         /**
          * Can optionally be used by concrete classes to carry out additional initialization work
          * as needed.
@@ -45742,13 +46685,13 @@ namespace {
     /**
      * Registers this version of Action Scheduler.
      */
-    function action_scheduler_register_3_dot_6_dot_0()
+    function action_scheduler_register_3_dot_6_dot_1()
     {
     }
     /**
      * Initializes this version of Action Scheduler.
      */
-    function action_scheduler_initialize_3_dot_6_dot_0()
+    function action_scheduler_initialize_3_dot_6_dot_1()
     {
     }
     /**
