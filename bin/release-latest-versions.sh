@@ -24,10 +24,11 @@ for V in 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 2.10 2.11 2.12 2.13 2.14 2.15 2
         continue
     fi
 
-    git -C "$ROOT_DIR" status --ignored --short -- source/ | sed -n -e 's#^!! ##p' | xargs --no-run-if-empty -- rm -rf
+    rm -rf "$ROOT_DIR/source/surecart" 2>/dev/null || true
+    rm -f "$ROOT_DIR/source/surecart."*.zip 2>/dev/null || true
 
-    wget -P "$ROOT_DIR/source/" "https://downloads.wordpress.org/plugin/surecart.${LATEST}.zip"
-    unzip -q -d "$ROOT_DIR/source/" "$ROOT_DIR/source/surecart.${LATEST}.zip"
+    wget -q -P "$ROOT_DIR/source/" "https://downloads.wordpress.org/plugin/surecart.${LATEST}.zip"
+    unzip -q -o -d "$ROOT_DIR/source/" "$ROOT_DIR/source/surecart.${LATEST}.zip"
     rm "$ROOT_DIR/source/surecart.${LATEST}.zip"
 
     echo "Generating stubs ..."
