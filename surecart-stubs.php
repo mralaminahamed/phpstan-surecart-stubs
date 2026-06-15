@@ -1065,6 +1065,16 @@ namespace SureCart\Cart {
         public function isMenuIconEnabled($term_id)
         {
         }
+        /**
+         * Remove deprecated cart content.
+         *
+         * @param string $content Cart content.
+         *
+         * @return string
+         */
+        public static function removeDeprecatedCartContent($content)
+        {
+        }
     }
     /**
      * Provides the cart service.
@@ -5926,16 +5936,6 @@ namespace SureCart\Controllers\Web {
         public function termsText()
         {
         }
-        /**
-         * Do not persist the cart on the buy page.
-         *
-         * @param array $data ScData array.
-         *
-         * @return array
-         */
-        public function doNotPersistCart($data)
-        {
-        }
     }
     /**
      * Handles Frontend Collection Pages.
@@ -6460,6 +6460,14 @@ namespace SureCart\Database {
          * @return boolean
          */
         public function versionChanged()
+        {
+        }
+        /**
+         * Handle cart migration
+         *
+         * @return \WP_Post|WP_Error
+         */
+        public function handleCartMigration()
         {
         }
     }
@@ -11328,6 +11336,14 @@ namespace SureCart\Models {
          * @return string
          */
         public function getMode()
+        {
+        }
+        /**
+         * Get the success url.
+         *
+         * @return string
+         */
+        public function getSuccessUrl()
         {
         }
         /**
@@ -22660,6 +22676,16 @@ namespace SureCart\Support\Blocks {
         {
         }
         /**
+         * Returns whether a block template is available in the site editor.
+         *
+         * @param string $template_slug The templates slug (e.g. single-product).
+         *
+         * @return boolean
+         */
+        public function isBlockAvailableInSiteEditor($template_slug)
+        {
+        }
+        /**
          * Build a new template object so that we can make SureCart Blocks default templates available in the current theme should they not have any.
          *
          * @param string $template_file Block template file path.
@@ -23538,6 +23564,18 @@ namespace SureCart\WordPress\Admin\Menus {
         public function getPage($slug, $name, $post_type = 'page')
         {
         }
+        /**
+         * Add a submenu page for a template.
+         *
+         * @param string $slug The slug.
+         * @param string $name The name.
+         * @param string $template_slug The template slug.
+         *
+         * @return null|string|false
+         */
+        public function addTemplateSubMenuPage($slug, $name, $template_slug)
+        {
+        }
     }
     /**
      * Register plugin options.
@@ -24176,14 +24214,6 @@ namespace SureCart\WordPress\Assets {
          * @return void
          */
         public function enqueueProductCollectionBlocks()
-        {
-        }
-        /**
-         * Enqueue Cart Blocks.
-         *
-         * @return void
-         */
-        public function enqueueCartBlocks()
         {
         }
         /**
@@ -34392,6 +34422,15 @@ namespace SureCartBlocks\Blocks\Form {
          * @return string
          */
         public function render($attributes, $content)
+        {
+        }
+        /**
+         * Get persistent mode.
+         *
+         * @param  array $attributes Block attributes.
+         * @return string|false
+         */
+        public function getPeristance($attributes, $id = null)
         {
         }
         /**
