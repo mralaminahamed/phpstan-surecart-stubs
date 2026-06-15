@@ -13637,6 +13637,14 @@ namespace SureCart\Models {
         {
         }
         /**
+         * Returns the product media image attributes.
+         *
+         * @return object
+         */
+        public function getFeaturedMediaAttribute()
+        {
+        }
+        /**
          * Get the JSON Schema Array
          *
          * @return array
@@ -18824,7 +18832,7 @@ namespace SureCart\Rest {
          *
          * @var array
          */
-        protected $methods = ['index', 'create', 'find', 'delete'];
+        protected $methods = ['index', 'create', 'find', 'delete', 'edit'];
         /**
          * Get our sample schema for a post.
          *
@@ -23756,6 +23764,14 @@ namespace SureCart\WordPress {
          * @return array
          */
         public function maybeEnqueueUAGBAssetsForShortcode($output, $attributes, $name)
+        {
+        }
+        /**
+         * Show the Gutenberg active notice.
+         *
+         * @return void
+         */
+        public function gutenbergActiveNotice(): void
         {
         }
     }
