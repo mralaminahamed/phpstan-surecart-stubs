@@ -1,5 +1,5 @@
 {
-    "name": "mralaminahamed/phpstan-surecart-stubs",
+    "name": "mralaminahamed/surecart-stubs",
     "description": "SureCart function and class declaration stubs for static analysis.",
     "type": "library",
     "keywords": [
