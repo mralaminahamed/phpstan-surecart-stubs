@@ -31,8 +31,8 @@ composer require --dev mralaminahamed/phpstan-surecart-stubs
 ### Manual Installation
 
 Download the stub files directly:
-- [surecart-stubs.php](https://raw.githubusercontent.com/mralaminahamed/phpstan-surecart-stubs/main/surecart-stubs.php)
-- [surecart-constants-stubs.php](https://raw.githubusercontent.com/mralaminahamed/phpstan-surecart-stubs/main/surecart-constants-stubs.php)
+- [surecart-stubs.stub](https://raw.githubusercontent.com/mralaminahamed/phpstan-surecart-stubs/main/surecart-stubs.stub)
+- [surecart-constants-stubs.stub](https://raw.githubusercontent.com/mralaminahamed/phpstan-surecart-stubs/main/surecart-constants-stubs.stub)
 
 ## Basic Configuration
 
@@ -48,8 +48,8 @@ phpstan-surecart-stubs/
 ├── configs/                           # Configuration files for stub generation
 │   ├── bootstrap.php                  # PHPStan bootstrap with WP constants
 │   └── finder.php                     # File finder configuration
-├── surecart-constants-stubs.php       # Constants stub file
-├── surecart-stubs.php                 # Main stubs file with classes and functions
+├── surecart-constants-stubs.stub       # Constants stub file
+├── surecart-stubs.stub                 # Main stubs file with classes and functions
 ├── phpstan.neon                       # PHPStan configuration
 ├── source/                            # Source for generating stubs
 └── tests/                             # Test files

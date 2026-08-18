@@ -1,8 +1,8 @@
 parameters:
     paths:
-        - surecart-stubs.php
+        - surecart-stubs.stub
     scanFiles:
-        - surecart-constants-stubs.php
+        - surecart-constants-stubs.stub
     bootstrapFiles:
         - configs/bootstrap.php
     level: 5

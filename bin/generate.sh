@@ -8,8 +8,8 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 HEADER=$'/**\n * Generated stub declarations for SureCart.\n * @see https://surecart.com\n * @see https://github.com/mralaminahamed/phpstan-surecart-stubs\n */'
 
-FILE="$ROOT_DIR/surecart-stubs.php"
-FILE_CONSTANTS="$ROOT_DIR/surecart-constants-stubs.php"
+FILE="$ROOT_DIR/surecart-stubs.stub"
+FILE_CONSTANTS="$ROOT_DIR/surecart-constants-stubs.stub"
 GENERATOR_BIN="$ROOT_DIR/vendor/bin/generate-stubs"
 FINDER_FILE="$ROOT_DIR/configs/finder.php"
 
