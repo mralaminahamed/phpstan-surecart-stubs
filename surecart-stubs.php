@@ -6431,11 +6431,25 @@ namespace SureCart\BlockLibrary {
         {
         }
         /**
+         * Coerce a raw filter value into a list.
+         *
+         * Crawlers routinely drop the `[0]` out of a faceted URL, so
+         * `?products-sc_collection=slug` arrives as a bare string where callers
+         * expect the list that `?products-sc_collection[0]=slug` produces.
+         *
+         * @param  mixed $value Raw filter value.
+         *
+         * @return array
+         */
+        protected function toList($value)
+        {
+        }
+        /**
          * Get the filter arguments.
          *
          * @param  string $instance_id Unique instance ID.
          *
-         * @return array
+         * @return array Map of taxonomy name to a list of term slugs.
          */
         public function getAllTaxonomyArgs($instance_id = '')
         {
@@ -6445,7 +6459,7 @@ namespace SureCart\BlockLibrary {
          *
          * @param  string $instance_id Unique instance ID.
          *
-         * @return array
+         * @return array Map of 'ratings' to a list of values.
          */
         public function getAllStarArgs($instance_id = ''): array
         {
@@ -28261,12 +28275,6 @@ namespace SureCart\Models\Blocks {
          */
         protected $url;
         /**
-         * Per-instance memo of resolved bundle component products, keyed by id.
-         *
-         * @var array
-         */
-        private $component_cache = array();
-        /**
          * Constructor.
          */
         public function __construct()
@@ -28304,52 +28312,6 @@ namespace SureCart\Models\Blocks {
          * @return array
          */
         public function context($context = [])
-        {
-        }
-        /**
-         * Load a bundle component from its own synced post-meta cache by product id.
-         *
-         * A component is a standalone product, so its variants and stock stay current
-         * through the normal product sync (surecart/product_stock_adjusted etc.). We
-         * read the component's own cache rather than a snapshot baked into the bundle,
-         * so a sub-product stock change reflects on the bundle without re-saving it.
-         * Bypasses sc_get_product()'s current-product short-circuit so it resolves the
-         * component even while the bundle is the active product context.
-         *
-         * @param string|null $component_id Component product id.
-         *
-         * @return \SureCart\Models\Product|null
-         */
-        public function getBundleComponentProduct($component_id)
-        {
-        }
-        /**
-         * Resolve a bundle component into a product-shaped object carrying its
-         * variants and variant_options.
-         *
-         * Prefers the live shortcut associations on the bundle item (buy page live
-         * fetch carries component_variants / component_variant_options). Falls back to
-         * the component's own synced cache (cached PDP model, where the bundle stores
-         * no component stock) — that cache stays fresh via the component's own product
-         * webhooks. Using the live associations on the buy page is essential: a
-         * component need not be synced as its own WP post, so the cache lookup can miss
-         * it and drop it from the seeded bundle_component_variants.
-         *
-         * @param object $item Bundle item.
-         * @return object|null Component product with variants/variant_options, or null.
-         */
-        public function resolveBundleComponent($item)
-        {
-        }
-        /**
-         * IDs of bundle components with variant options — the only ones the buy
-         * button gates on when unfilled.
-         *
-         * @param object $product The bundle product (or non-bundle — returns []).
-         *
-         * @return array
-         */
-        protected function getBundleVariableComponentIds($product)
         {
         }
         /**
@@ -34362,6 +34324,18 @@ namespace SureCart\Models {
          */
         protected $cache_key = 'products';
         /**
+         * Memoized bundle component lookups for this instance.
+         *
+         * @var array
+         */
+        protected $component_cache = array();
+        /**
+         * Whether bundle components have been batch-prefetched for this instance.
+         *
+         * @var boolean
+         */
+        protected $components_prefetched = false;
+        /**
          * Hydrate the bundle_items collection from API expansion.
          *
          * @param array $value Bundle items payload.
@@ -34700,7 +34674,8 @@ namespace SureCart\Models {
         }
         /**
          * Get the has options attribute.
-         * Determines if product has options (variants, multiple prices, or ad hoc pricing).
+         * Determines if the customer must make a choice before purchase (variants,
+         * multiple prices, ad hoc pricing, or bundle components with variants).
          *
          * @return boolean
          */
@@ -34708,9 +34683,99 @@ namespace SureCart\Models {
         {
         }
         /**
+         * Whether any bundle component has variant options, meaning the customer
+         * must pick options before the bundle can be added to cart. Surfaces gating
+         * on has_options (e.g. Quick Add) require a selection exactly when the
+         * product page buy button would.
+         *
+         * @return boolean
+         */
+        public function getHasVariableComponentsAttribute()
+        {
+        }
+        /**
+         * IDs of bundle components with variant options — the only ones a buy
+         * button gates on when unfilled. Empty for non-bundles.
+         *
+         * @return array
+         */
+        public function getBundleVariableComponentIdsAttribute()
+        {
+        }
+        /**
+         * Resolve a bundle component into a product-shaped object carrying its
+         * variants and variant_options. The canonical resolver — every surface
+         * (product page, quick add, variant pills) must agree on what a component's
+         * variants are.
+         *
+         * Prefers the live shortcut associations on the bundle item (buy page live
+         * fetch carries component_variants / component_variant_options). Falls back
+         * to the component's own synced cache (the synced bundle omits component
+         * variant data) — that cache stays fresh via the component's own product
+         * webhooks. Using the live associations on the buy page is essential: a
+         * component need not be synced as its own WP post, so the cache lookup can
+         * miss it.
+         *
+         * @param object $item Bundle item.
+         *
+         * @return object|null Component product with variants/variant_options, or null.
+         */
+        public function resolveBundleComponent($item)
+        {
+        }
+        /**
+         * Whether a bundle item carries live component associations, letting
+         * resolveBundleComponent() skip the synced-cache lookup. The single
+         * definition keeps the prefetch skip logic and the resolver in lockstep.
+         *
+         * @param object $item Bundle item.
+         *
+         * @return boolean
+         */
+        protected function hasLiveComponentAssociations($item)
+        {
+        }
+        /**
+         * Batch-prime the component memo for every bundle item lacking live
+         * associations — one sc_id IN (...) query per bundle instead of one query
+         * per component. Runs once per instance; misses stay memoized as null so
+         * single lookups don't re-query them.
+         *
+         * @return void
+         */
+        protected function prefetchBundleComponents()
+        {
+        }
+        /**
+         * Query synced component products by sc_id and memoize the hydrated models.
+         * Misses are memoized as null so they are never re-queried. Queries by
+         * sc_id directly instead of sc_get_product(), which short-circuits to the
+         * current product inside product loops.
+         *
+         * @param array $ids Component product ids.
+         *
+         * @return void
+         */
+        protected function primeComponentCache($ids)
+        {
+        }
+        /**
+         * Load a bundle component product from its own synced post-meta cache.
+         *
+         * Usually a memo hit after prefetchBundleComponents(); the query only runs
+         * for items outside this product's bundle_items.
+         *
+         * @param string|null $component_id Component product id.
+         *
+         * @return Product|null
+         */
+        protected function getBundleComponentFromCache($component_id)
+        {
+        }
+        /**
          * Get the featured image attribute.
          *
-         * @return \SureCart\Support\Contracts\GalleryItem|null;
+         * @return GalleryItem|null;
          */
         public function getFeaturedImageAttribute()
         {
@@ -51370,6 +51435,16 @@ namespace SureCart\WordPress\Assets {
         {
         }
         /**
+         * Whether SureCart should automatically send Google Analytics (gtag/dataLayer) events.
+         *
+         * Stores running their own GA4/GTM stack can opt out to avoid double-tracking.
+         *
+         * @return bool
+         */
+        public function isGoogleTrackingEnabled()
+        {
+        }
+        /**
          * Register the component scripts and translations.
          *
          * @return void
@@ -52012,6 +52087,14 @@ namespace SureCart\WordPress {
          * @return void
          */
         public function gutenbergActiveNotice(): void
+        {
+        }
+        /**
+         * Warn admins when the site's WordPress version is below the plugin's minimum.
+         *
+         * @return void
+         */
+        public function minimumWpVersionNotice(): void
         {
         }
         /**
@@ -52676,6 +52759,14 @@ namespace SureCart\WordPress {
          * @return string
          */
         public function version()
+        {
+        }
+        /**
+         * Get the minimum WordPress version the plugin requires.
+         *
+         * @return string Required WordPress version, or empty string if not declared.
+         */
+        public function requiredWPVersion()
         {
         }
         /**
@@ -62999,6 +63090,15 @@ namespace SureCartBlocks\Blocks\Form {
          * @return string
          */
         public function render($attributes, $content)
+        {
+        }
+        /**
+         * Get the URL the customer is sent to after a successful checkout.
+         *
+         * @param  array $attributes Block attributes.
+         * @return string
+         */
+        public function getSuccessUrl($attributes)
         {
         }
         /**
