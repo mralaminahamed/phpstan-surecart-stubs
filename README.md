@@ -75,6 +75,10 @@ composer test
 composer release
 ```
 
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md). Package versions track upstream releases.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
