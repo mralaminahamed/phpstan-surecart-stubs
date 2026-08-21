@@ -6972,6 +6972,20 @@ namespace SureCart\Concerns {
         {
         }
         /**
+         * Ownership exception for records hidden from anonymous reads.
+         *
+         * Controllers override this to let a caller read a hidden record they can
+         * prove ownership of (e.g. a customer's purchased draft product). Must
+         * fail closed — anonymous callers keep the 404.
+         *
+         * @param \SureCart\Models\Model $model Fetched model.
+         *
+         * @return boolean
+         */
+        protected function anonymousCanViewHidden($model)
+        {
+        }
+        /**
          * Should this record be hidden from anonymous callers?
          *
          * @param \SureCart\Models\Model $model Fetched model.
@@ -14423,6 +14437,22 @@ namespace SureCart\Controllers\Rest {
          * @return \SureCart\Models\Model
          */
         protected function catalogMiddleware($class, \WP_REST_Request $request)
+        {
+        }
+        /**
+         * Let a logged-in customer read their own hidden (draft) product.
+         *
+         * Subscriptions keep referencing a product after it moves back to draft,
+         * and the dashboard switch UI fetches that product by id — the same
+         * grandfathering reason archived stays readable on find (see $anonymous_scope).
+         * Anonymous callers always keep the 404; access is only granted when the
+         * current user's customer owns an unrevoked purchase of this exact product.
+         *
+         * @param \SureCart\Models\Product $model Fetched product.
+         *
+         * @return boolean
+         */
+        protected function anonymousCanViewHidden($model)
         {
         }
         /**
