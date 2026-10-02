@@ -7606,6 +7606,18 @@ namespace SureCart\Support\Scripts {
         {
         }
         /**
+         * Whether this request is a server-rendered classic list, where the unified
+         * bundle would load and mount nothing.
+         *
+         * Edit/create routes (`action` present) and SPA-only screens always boot the
+         * bundle, whatever the enhanced-views flag says.
+         *
+         * @return bool
+         */
+        protected function servesClassicList(): bool
+        {
+        }
+        /**
          * Enqueue scripts
          *
          * @return void
@@ -53188,6 +53200,12 @@ namespace SureCart\WordPress\Admin {
          */
         const UNIFIED_SPA_PAGES = array('sc-dashboard', 'sc-products', 'sc-bundles', 'sc-product-collections', 'sc-product-groups', 'sc-reviews', 'sc-orders', 'sc-invoices', 'sc-abandoned-checkouts', 'sc-shipping-labels', 'sc-subscriptions', 'sc-customers', 'sc-coupons', 'sc-bumps', 'sc-upsell-funnels', 'sc-auto-fees', 'sc-licenses', 'sc-forms', 'sc-cancellation-insights', 'sc-affiliates', 'sc-affiliate-clicks', 'sc-affiliate-payouts', 'sc-affiliate-payout-groups', 'sc-affiliate-referrals', 'sc-affiliate-requests', 'sc-learn');
         /**
+         * Unified pages with no server-rendered classic view to toggle to.
+         *
+         * @var string[]
+         */
+        const SPA_ONLY_PAGES = array('sc-dashboard', 'sc-learn');
+        /**
          * Reports dashboard section per page slug — the header's "View Reports" button.
          *
          * @var string[]
@@ -53218,7 +53236,24 @@ namespace SureCart\WordPress\Admin {
         {
         }
         /**
-         * Where the view toggle returns to for a page.
+         * Admin page slug of the current request, or ''.
+         *
+         * @return string
+         */
+        public static function currentSlug(): string
+        {
+        }
+        /**
+         * Whether a page has a classic view, i.e. whether the view toggle applies to it.
+         *
+         * @param string $slug Admin page slug.
+         * @return bool
+         */
+        public static function hasClassicView(string $slug): bool
+        {
+        }
+        /**
+         * Where the view toggle returns to for a page, or '' when it has no classic view.
          *
          * @param string $slug Admin page slug.
          * @return string
@@ -57079,6 +57114,16 @@ namespace SureCart\WordPress\PostTypes {
          * @return array
          */
         public function getJsonSchemaArray($product): array
+        {
+        }
+        /**
+         * Get the offer for the price the product page preselects, if Google can list it.
+         *
+         * @param \SureCart\Models\Product $product The product.
+         *
+         * @return array
+         */
+        public function getOffersSchema($product): array
         {
         }
         /**
