@@ -7077,6 +7077,19 @@ namespace SureCart\Concerns {
         {
         }
         /**
+         * Query filters forced onto list requests from callers without the edit capability.
+         *
+         * Controllers override this to widen the scope for a caller who can prove
+         * ownership. Must fail closed to `$anonymous_scope`.
+         *
+         * @param \WP_REST_Request $request Request object.
+         *
+         * @return array
+         */
+        protected function anonymousScope(\WP_REST_Request $request)
+        {
+        }
+        /**
          * Find model.
          *
          * Platform show endpoints ignore list filters, so hide draft and
@@ -15547,6 +15560,52 @@ namespace SureCart\Controllers\Rest {
          * @return boolean
          */
         protected function anonymousCanViewHidden($model)
+        {
+        }
+        /**
+         * Let a customer list draft products of an upgrade group they belong to.
+         *
+         * Upgrade groups often hold members-only (draft) products, and the dashboard
+         * switch UI lists the group to offer them. Only widened for a single group
+         * the customer owns an unrevoked purchase in; archived stays excluded.
+         *
+         * @param \WP_REST_Request $request Request object.
+         *
+         * @return array
+         */
+        protected function anonymousScope(\WP_REST_Request $request)
+        {
+        }
+        /**
+         * Does the current customer own an unrevoked purchase of any product in this group?
+         *
+         * @param string $group_id Product group id.
+         *
+         * @return boolean
+         */
+        protected function ownsProductInGroup($group_id)
+        {
+        }
+        /**
+         * Customer ids of the logged-in user.
+         *
+         * Must be a sequential list — the platform ignores (rather than filters on)
+         * associative customer_ids (see ModelPermissionsController::isListingOwnCustomerIds).
+         *
+         * @return array
+         */
+        protected function currentCustomerIds()
+        {
+        }
+        /**
+         * Do these customers hold an unrevoked purchase of any of these products?
+         *
+         * @param array $customer_ids Customer ids.
+         * @param array $product_ids  Product ids.
+         *
+         * @return boolean
+         */
+        protected function ownsAnyProduct($customer_ids, $product_ids)
         {
         }
         /**
