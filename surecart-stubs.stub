@@ -5356,13 +5356,17 @@ namespace SureCart\BlockLibrary {
         {
         }
         /**
-         * Add iFrame to allowed wp_kses_post tags
+         * Allow our web components in the wp_kses_post context only.
          *
-         * @param array $tags Allowed tags, attributes, and/or entities.
+         * Comments, data and explicit contexts stay untouched so users without
+         * unfiltered_html cannot store sc-* markup there.
+         *
+         * @param array  $tags    Allowed tags, attributes, and/or entities.
+         * @param string $context Context name, 'explicit' when an array was passed.
          *
          * @return array
          */
-        public function ksesComponents($tags)
+        public function ksesComponents($tags, $context = '')
         {
         }
         /**
@@ -16397,12 +16401,34 @@ namespace SureCart\Controllers\Rest {
      */
     class UpsellFunnelsController extends \SureCart\Controllers\Rest\RestController
     {
+        use \SureCart\Concerns\RestrictsAnonymousReads;
         /**
          * Class to make the requests.
          *
          * @var string
          */
         protected $class = \SureCart\Models\UpsellFunnel::class;
+        /**
+         * Capability that unlocks unrestricted reads.
+         *
+         * @var string
+         */
+        protected $edit_capability = 'edit_sc_prices';
+        /**
+         * Expands safe to forward for anonymous callers.
+         *
+         * None: upsells.price.product reaches the full private product graph,
+         * and the storefront never reads funnels over REST.
+         *
+         * @var array
+         */
+        protected $anonymous_expands = [];
+        /**
+         * Query filters forced for anonymous callers.
+         *
+         * @var array
+         */
+        protected $anonymous_scope = [];
     }
     /**
      * Handle upsell requests through the REST API
@@ -44548,6 +44574,12 @@ namespace SureCart\Rest {
          */
         protected $methods = ['index', 'edit', 'create', 'find', 'delete'];
         /**
+         * Filter index list items by schema context.
+         *
+         * @var boolean
+         */
+        protected $filters_list_items = true;
+        /**
          * Register REST Routes.
          *
          * @return void
@@ -44614,6 +44646,20 @@ namespace SureCart\Rest {
          * @return true|\WP_Error True if the request has access to create items, WP_Error object otherwise.
          */
         public function delete_item_permissions_check($request)
+        {
+        }
+        /**
+         * Strip private catalog data expanded onto line items for guests.
+         *
+         * Decided by capability, not the requested context: the write routes are
+         * open to guests too and don't gate `context=edit`.
+         *
+         * @param array|\WP_REST_Response $data    Response data to filter.
+         * @param string                  $context Context defined in the schema.
+         *
+         * @return array Filtered response.
+         */
+        public function filter_response_by_context($data, $context)
         {
         }
     }
@@ -50660,8 +50706,9 @@ namespace SureCart\Support {
          * - purchase_limit: quantity caps (getMaxStockQuantity).
          * - archived: render gates (sc-price-choice, product store getters).
          *
-         * The REST providers keep stripping these — the storefront renders stock
-         * state server-side, the anonymous REST catalog does not need to.
+         * The catalog REST providers keep stripping these — the storefront renders
+         * stock state server-side. The checkout and line item routes go through
+         * response() and keep them: the cart caps quantities from them.
          *
          * @return array
          */
@@ -50711,19 +50758,29 @@ namespace SureCart\Support {
         {
         }
         /**
-         * Strip catalog data expanded onto a checkout's line items.
+         * Strip every catalog object expanded anywhere in a guest-facing response.
          *
-         * The checkout routes accept anonymous callers by design (guest checkout),
-         * and `expand=price.product` pulls a full product into the response — the
-         * same data the page output strips, reachable without a purchase. Applied
-         * to the view context only, so the owner and the matching customer still
-         * get the full record.
+         * The checkout and line item routes accept anonymous callers by design
+         * (guest checkout), and the platform applies `price.product` / `variant.product`
+         * to every price or variant in the response — line items, swaps, bundle
+         * components, bumps, upsells, the upsell funnel. Matching on `object` instead
+         * of known paths means a new expandable relation can't reopen the leak.
          *
-         * @param array|mixed $data Checkout response data. Anything else passes through untouched.
+         * @param array|mixed $data Response data. Anything else passes through untouched.
          *
          * @return array|mixed
          */
-        public static function lineItems($data)
+        public static function response($data)
+        {
+        }
+        /**
+         * Depth-first strip of catalog objects, keyed by their `object` type.
+         *
+         * @param array|mixed $data Response data.
+         *
+         * @return array|mixed
+         */
+        private function stripCatalogTree($data)
         {
         }
         /**
