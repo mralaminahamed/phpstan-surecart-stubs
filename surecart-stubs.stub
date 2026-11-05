@@ -3687,13 +3687,24 @@ namespace SureCart\Account {
         /**
          * Set up a store for a third party (e.g. Starter Templates) without ever replacing a connected account.
          *
+         * An `api_token` connects the site to that existing store instead; a connected site keeps its store.
          * Callers can tell the outcomes apart with `instanceof ProvisionalAccount` (created) vs `Account` (existing).
          *
-         * @param array $data Provisional account attributes. When connected, only `products` and `import_woocommerce_products` are used.
+         * @param array $data Provisional account attributes, plus an optional `api_token`. Once connected, only `products` and `import_woocommerce_products` are used.
          *
          * @return Account|ProvisionalAccount|\WP_Error
          */
         public function setup($data = [])
+        {
+        }
+        /**
+         * Connect this site to an existing store, saving the token only once the platform accepts it.
+         *
+         * @param string $token The store's API token.
+         *
+         * @return true|\WP_Error
+         */
+        protected function connect($token)
         {
         }
         /**
